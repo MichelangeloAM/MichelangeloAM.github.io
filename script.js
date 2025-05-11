@@ -1,6 +1,36 @@
 // Set current year in footer
 document.getElementById('year').textContent = new Date().getFullYear();
 
+// Parallax effect for background
+const parallaxBg = document.querySelector('.parallax-bg');
+const parallaxEffect = () => {
+    if (!parallaxBg) return;
+    
+    // Calculate how far down the page the user has scrolled
+    const scrollPosition = window.pageYOffset;
+    
+    // Get page height and window height
+    const pageHeight = document.body.scrollHeight;
+    const windowHeight = window.innerHeight;
+    
+    // Calculate the maximum scroll position
+    const maxScroll = pageHeight - windowHeight;
+    
+    // Calculate the percentage of the page that has been scrolled
+    const scrollPercentage = scrollPosition / maxScroll;
+    
+    // Calculate the maximum amount the background should move
+    // This ensures the background always covers the visible area
+    const maxParallaxOffset = parallaxBg.offsetHeight - windowHeight;
+    
+    // Move the background at a slower rate than the scroll speed
+    // Limit the movement to ensure the background always covers the page
+    const translateY = Math.min(scrollPercentage * maxParallaxOffset, maxParallaxOffset);
+    
+    // Apply transform to create parallax effect
+    parallaxBg.style.transform = `translate3d(0, -${translateY}px, 0)`;
+};
+
 // Mobile menu toggle
 const menuBtn = document.querySelector('.menu-btn');
 const navLinks = document.querySelector('.nav-links');
@@ -51,16 +81,26 @@ const animateSkills = () => {
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
         
         if (isVisible) {
-            // Use the width from the inline style that's already in the HTML
-            const width = bar.style.width;
+            // Get the original width from the inline style
+            const originalWidth = bar.getAttribute('data-width') || bar.style.width;
+            
+            // Store the original width if not already stored
+            if (!bar.getAttribute('data-width')) {
+                bar.setAttribute('data-width', originalWidth);
+            }
+            
             // Set initial width to 0 if not already animated
             if (bar.dataset.animated !== 'true') {
                 bar.style.width = '0%';
+                
                 // Use setTimeout to trigger animation
                 setTimeout(() => {
-                    bar.style.width = width;
+                    bar.style.width = originalWidth;
                     bar.dataset.animated = 'true';
                 }, 100);
+            } else {
+                // Ensure the width is maintained
+                bar.style.width = originalWidth;
             }
         }
     });
@@ -120,9 +160,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Call animateSkills on page load to initialize animations
 document.addEventListener('DOMContentLoaded', () => {
     animateSkills();
+    // Initialize parallax on page load
+    parallaxEffect();
 });
 
-// Add scroll event listener
+// Add scroll event listeners
 window.addEventListener('scroll', () => {
     animateSkills();
+    parallaxEffect();
+});
+
+// Handle resize events for parallax
+window.addEventListener('resize', () => {
+    parallaxEffect();
 }); 

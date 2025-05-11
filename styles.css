@@ -8,7 +8,7 @@
     --text-color: #f8fafc;
     --text-color-muted: #94a3b8;
     --background-color: #020617;
-    --card-background: rgba(30, 41, 59, 0.5);
+    --card-background: rgba(30, 41, 59, 0.7);
     --border-color: #1e293b;
     --transition: all 0.3s ease;
     --shadow: 0 10px 30px -15px rgba(2, 6, 23, 0.5);
@@ -26,14 +26,65 @@
 
 html {
     scroll-behavior: smooth;
+    height: 100%;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     overflow-x: hidden;
+    position: relative;
+    background-color: transparent;
+    min-height: 100%;
+}
+
+/* Parallax Background Container */
+.parallax-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    overflow: hidden;
+}
+
+.parallax-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150%; /* Increased height to ensure coverage when scrolling */
+    background-image: url('images/waterfall-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Content wrapper */
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, 
+        rgba(2, 6, 23, 0.7) 0%,
+        rgba(2, 6, 23, 0.65) 50%,
+        rgba(2, 6, 23, 0.7) 100%);
+}
+
+/* Make cards more transparent to see background better */
+.profile-card, 
+.about-card, 
+.experience-card, 
+.skills-card, 
+.interest-item, 
+.language-item, 
+.contact-info, 
+.contact-form {
+    background-color: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(5px);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -109,6 +160,36 @@ img {
 
 section {
     padding: 5rem 0;
+    position: relative;
+}
+
+/* Remove the section::before that was adding a background overlay */
+section::before {
+    content: none;
+}
+
+/* Add section background styles */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 80px;
+    position: relative;
+}
+
+.about {
+    position: relative;
+}
+
+.experience {
+    position: relative;
+}
+
+.skills {
+    position: relative;
+}
+
+.contact {
     position: relative;
 }
 
@@ -212,14 +293,6 @@ nav {
 }
 
 /* ===== HERO SECTION ===== */
-.hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding-top: 80px;
-    background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08), transparent 50%);
-}
-
 .hero-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -324,19 +397,15 @@ nav {
 .detail-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1rem;
 }
 
 .detail-item .label {
     color: var(--text-color-muted);
-    width: 80px;
+    width: 100px;
 }
 
 /* ===== ABOUT SECTION ===== */
-.about {
-    background-image: radial-gradient(circle at top center, rgba(59, 130, 246, 0.05), transparent 50%);
-}
-
 .about-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -440,10 +509,6 @@ nav {
 }
 
 /* ===== EXPERIENCE SECTION ===== */
-.experience {
-    background-image: radial-gradient(circle at center, rgba(59, 130, 246, 0.05), transparent 50%);
-}
-
 .tabs {
     display: flex;
     justify-content: center;
@@ -519,10 +584,6 @@ nav {
 }
 
 /* ===== SKILLS SECTION ===== */
-.skills {
-    background-image: radial-gradient(circle at bottom, rgba(59, 130, 246, 0.05), transparent 50%);
-}
-
 .skills-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -585,6 +646,8 @@ nav {
     background-color: var(--accent-color);
     border-radius: 4px;
     transition: width 1s ease-in-out;
+    min-width: 0%;
+    will-change: width;
 }
 
 .soft-skills {
@@ -636,10 +699,6 @@ nav {
 }
 
 /* ===== CONTACT SECTION ===== */
-.contact {
-    background-image: radial-gradient(circle at top, rgba(59, 130, 246, 0.05), transparent 50%);
-}
-
 .contact-content {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -786,6 +845,8 @@ footer {
     background-color: var(--primary-color-dark);
     border-top: 1px solid var(--border-color);
     padding: 3rem 0;
+    position: relative;
+    z-index: 1;
 }
 
 .footer-content {
@@ -830,6 +891,23 @@ footer {
     border-top: 1px solid var(--border-color);
     color: var(--text-color-muted);
     font-size: 0.875rem;
+}
+
+/* Photo credit */
+.photo-credit {
+    text-align: center;
+    padding: 1rem 0;
+    background-color: rgba(2, 6, 23, 0.95);
+    font-size: 0.75rem;
+    color: var(--text-color-muted);
+}
+
+.photo-credit a {
+    color: var(--accent-color);
+}
+
+.photo-credit a:hover {
+    text-decoration: underline;
 }
 
 /* ===== MEDIA QUERIES ===== */

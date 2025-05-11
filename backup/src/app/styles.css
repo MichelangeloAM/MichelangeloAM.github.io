@@ -1,0 +1,57 @@
+/* Basic styles */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.text-accent {
+  color: #3b82f6;
+}
+
+.bg-primary-900 {
+  background-color: #0f172a;
+}
+
+.bg-primary-950 {
+  background-color: #020617;
+}
+
+.bg-primary-800 {
+  background-color: #1e293b;
+}
+
+.rounded-3xl {
+  border-radius: 1.5rem;
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-primary-800 {
+  border-color: #1e293b;
+}
+
+.p-8 {
+  padding: 2rem;
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.relative {
+  position: relative;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Add more styles as needed */ 

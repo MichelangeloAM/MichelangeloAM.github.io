@@ -129,7 +129,7 @@ if (contactForm) {
             // 3. Create an email template
             // 4. Replace these placeholders with your actual EmailJS credentials:
             const serviceId = 'service_z873o3a'; // Your EmailJS service ID from the dashboard
-            const templateId = 'service_z873o3a'; // Your EmailJS template ID - this needs to be your actual template ID
+            const templateId = 'template_61ffjnj'; // Your EmailJS template ID - this needs to be your actual template ID
             const publicKey = 'voivAF3zxUVrmTCOa'; // Your EmailJS public key (same as in index.html)
             
             // Send form data using EmailJS service

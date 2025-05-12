@@ -123,19 +123,26 @@ if (contactForm) {
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
             submitButton.disabled = true;
             
+            // EMAILJS SETUP INSTRUCTIONS:
+            // 1. Create a free account at https://www.emailjs.com/
+            // 2. Add an email service (Gmail, Outlook, etc.)
+            // 3. Create an email template
+            // 4. Replace these placeholders with your actual EmailJS credentials:
+            const serviceId = 'service_id_here'; // Your EmailJS service ID from the dashboard
+            const templateId = 'template_id_here'; // Your EmailJS template ID
+            const publicKey = 'your_public_key'; // Your EmailJS public key (same as in index.html)
+            
             // Send form data using EmailJS service
-            // You need to create an account on emailjs.com and replace these values
-            // with your own service ID, template ID, and user ID
             const response = await emailjs.send(
-                'service_id_here', // Replace with your EmailJS service ID
-                'template_id_here', // Replace with your EmailJS template ID
+                serviceId,
+                templateId,
                 {
                     from_name: data.name,
                     from_email: data.email,
                     subject: data.subject,
                     message: data.message
                 },
-                'user_id_here' // Replace with your EmailJS user ID
+                publicKey // Your public key (optional here if already set in init())
             );
             
             // Show success message

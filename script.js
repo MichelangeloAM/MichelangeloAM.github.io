@@ -109,36 +109,77 @@ const animateSkills = () => {
 // Contact form handling
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         // Get form data
         const formData = new FormData(contactForm);
         const data = Object.fromEntries(formData);
         
-        // Here you would typically send the data to a server
-        console.log('Form submitted:', data);
-        
-        // Show success message (in a real app, this would happen after successful submission)
-        const successMessage = document.createElement('div');
-        successMessage.className = 'success-message';
-        successMessage.textContent = 'Your message has been sent successfully!';
-        successMessage.style.color = '#10b981';
-        successMessage.style.marginTop = '1rem';
-        
-        // Remove any existing message
-        const existingMessage = contactForm.querySelector('.success-message, .error-message');
-        if (existingMessage) {
-            existingMessage.remove();
+        try {
+            // Show loading state
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitButton.disabled = true;
+            
+            // Send form data using EmailJS service
+            // You need to create an account on emailjs.com and replace these values
+            // with your own service ID, template ID, and user ID
+            const response = await emailjs.send(
+                'service_id_here', // Replace with your EmailJS service ID
+                'template_id_here', // Replace with your EmailJS template ID
+                {
+                    from_name: data.name,
+                    from_email: data.email,
+                    subject: data.subject,
+                    message: data.message
+                },
+                'user_id_here' // Replace with your EmailJS user ID
+            );
+            
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.textContent = 'Your message has been sent successfully!';
+            successMessage.style.color = '#10b981';
+            successMessage.style.marginTop = '1rem';
+            
+            // Remove any existing message
+            const existingMessage = contactForm.querySelector('.success-message, .error-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            contactForm.appendChild(successMessage);
+            contactForm.reset();
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+        } catch (error) {
+            // Show error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = 'Failed to send your message. Please try again later.';
+            errorMessage.style.color = '#ef4444';
+            errorMessage.style.marginTop = '1rem';
+            
+            // Remove any existing message
+            const existingMessage = contactForm.querySelector('.success-message, .error-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            contactForm.appendChild(errorMessage);
+            console.error('Email sending failed:', error);
+        } finally {
+            // Reset button state
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
         }
-        
-        contactForm.appendChild(successMessage);
-        contactForm.reset();
-        
-        // Remove message after 5 seconds
-        setTimeout(() => {
-            successMessage.remove();
-        }, 5000);
     });
 }
 

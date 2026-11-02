@@ -18,8 +18,8 @@ const description = it
   ? 'Scrivi a Michelangelo Amoruso Manzari, AI & ML Engineer a Roma: raccontami i tuoi dati e il KPI che vuoi migliorare. Progetti in Italia, in Europa e da remoto.'
   : 'Contact Michelangelo Amoruso Manzari, AI & ML Engineer in Rome: tell me about your data and the KPI you want to improve. Projects across Italy, Europe and remote.';
 const F = it
-  ? { name: 'Nome', email: 'Email di lavoro', company: 'Azienda', service: 'Di cosa hai bisogno', data: 'Dati che hai', message: 'Il numero che vuoi muovere', placeholder: 'Es. “Gestiamo 40.000 sinistri l’anno e vorremmo ridurre i tempi di stima.”', send: 'Invia messaggio', sending: 'Invio…', ok: 'Grazie! Il messaggio è arrivato, ti rispondo personalmente.', err: 'Invio non riuscito. Scrivimi direttamente a', privacy: 'Uso questi dati solo per risponderti.', direct: 'Preferisci scrivere direttamente?', unsure: 'Non sono sicuro' }
-  : { name: 'Name', email: 'Work email', company: 'Company', service: 'What you need', data: 'Data you have', message: 'The number you want to move', placeholder: 'E.g. “We handle 40,000 claims a year and want to cut estimate time.”', send: 'Send message', sending: 'Sending…', ok: 'Thank you! Your message arrived; I’ll reply personally.', err: 'Sending failed. Email me directly at', privacy: 'I only use this data to reply to you.', direct: 'Prefer to write directly?', unsure: 'Not sure yet' };
+  ? { name: 'Nome', email: 'Email di lavoro', company: 'Azienda', service: 'Di cosa hai bisogno', data: 'Dati che hai', message: 'Il numero che vuoi muovere', placeholder: 'Es. “Gestiamo 40.000 sinistri l’anno e vorremmo ridurre i tempi di stima.”', send: 'Invia messaggio', sending: 'Invio…', ok: 'Grazie! Il messaggio è arrivato, ti rispondo personalmente.', err: 'Il modulo non è riuscito a inviare il messaggio. Il testo è pronto: aprilo nella tua app di posta e premi invia.', mailBtn: 'Apri nella mia email', privacy: 'Uso questi dati solo per risponderti.', direct: 'Preferisci scrivere direttamente?', unsure: 'Non sono sicuro' }
+  : { name: 'Name', email: 'Work email', company: 'Company', service: 'What you need', data: 'Data you have', message: 'The number you want to move', placeholder: 'E.g. “We handle 40,000 claims a year and want to cut estimate time.”', send: 'Send message', sending: 'Sending…', ok: 'Thank you! Your message arrived; I’ll reply personally.', err: 'The form couldn’t send your message. It’s ready to go: open it in your email app and press send.', mailBtn: 'Open in my email app', privacy: 'I only use this data to reply to you.', direct: 'Prefer to write directly?', unsure: 'Not sure yet' };
 const jsonld = graph(
   personNode(lang),
   webPageNode({ url: route('contact', lang), name: title, description, lang, type: 'ContactPage', dateModified: LAST_UPDATED }),
@@ -32,7 +32,7 @@ const jsonld = graph(
 
   <section class="surface-dark" data-surface="dark">
     <div class="container-x grid gap-12 pb-28 lg:grid-cols-[1.3fr_0.7fr] lg:gap-20">
-      <form class="card grid gap-5 p-6 md:p-10" data-contact novalidate data-ok={F.ok} data-err={F.err} data-sending={F.sending} data-email={profile.email}>
+      <form class="card grid gap-5 p-6 md:p-10" data-contact novalidate data-ok={F.ok} data-err={F.err} data-mail-btn={F.mailBtn} data-sending={F.sending} data-email={profile.email}>
         <div class="grid gap-5 md:grid-cols-2">
           <label class="field"><span>{F.name}</span><input name="name" required autocomplete="name" /></label>
           <label class="field"><span>{F.email}</span><input name="email" type="email" required autocomplete="email" /></label>
@@ -117,8 +117,27 @@ const jsonld = graph(
       }, { publicKey: PUBLIC_KEY });
       form.reset();
       if (status) { status.textContent = form.dataset.ok ?? ''; status.className = 'text-sm text-mint'; }
-    } catch {
-      if (status) { status.innerHTML = `${form.dataset.err} <a class="underline" href="mailto:${form.dataset.email}">${form.dataset.email}</a>`; status.className = 'text-sm text-ember'; }
+    } catch (err) {
+      console.warn('[contact] EmailJS failed', (err as { status?: number; text?: string })?.status, (err as { text?: string })?.text);
+      // Never lose a lead: hand the visitor a pre-filled email to the same address.
+      const to = form.dataset.email ?? '';
+      const subject = `[Portfolio] ${data.service} · ${data.company || data.name}`;
+      const body = `${data.message}\n\n—\n${data.name}${data.company ? ` · ${data.company}` : ''}\n${data.email}\nService: ${data.service}\nData: ${data.data}`;
+      const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      if (status) {
+        status.className = 'grid gap-3 rounded-2xl border border-ember/40 bg-ember/10 p-4 text-sm text-bone';
+        status.innerHTML = '';
+        const msg = document.createElement('p');
+        msg.textContent = form.dataset.err ?? '';
+        const link = document.createElement('a');
+        link.href = href;
+        link.className = 'btn btn-ember w-fit';
+        link.textContent = `${form.dataset.mailBtn ?? 'Email'} →`;
+        const alt = document.createElement('p');
+        alt.className = 'mono text-[0.7rem] text-ash';
+        alt.textContent = to;
+        status.append(msg, link, alt);
+      }
     } finally {
       btn.disabled = false;
       btn.innerHTML = label;

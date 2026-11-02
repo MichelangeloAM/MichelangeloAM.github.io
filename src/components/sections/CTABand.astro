@@ -1,0 +1,30 @@
+---
+import { homeCopy } from '@/data/home';
+import { route } from '@/data/routes.mjs';
+import { profile } from '@/data/profile';
+import { t } from '@/i18n/ui';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).cta;
+const s = t(lang);
+---
+
+<section class="surface-dark relative isolate overflow-hidden" data-surface="dark" id="cta">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    <div class="blob left-[10%] top-[20%] size-[34rem] bg-violet/45"></div>
+    <div class="blob left-[35%] top-[30%] size-[28rem] bg-ember/45 [animation-delay:-5s]"></div>
+    <div class="blob right-[8%] top-[5%] size-[26rem] bg-blush/35 [animation-delay:-11s]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#0a0a0b_75%)]"></div>
+  </div>
+  <div class="container-x py-28 text-center md:py-44">
+    <p class="eyebrow reveal justify-center">{c.eyebrow}</p>
+    <h2 class="display reveal mx-auto mt-6 max-w-5xl">{c.title} <span class="serif-accent text-gradient">{c.titleAccent}</span></h2>
+    <p class="lede reveal mx-auto mt-6 text-center">{c.sub}</p>
+    <div class="reveal mt-10 flex flex-wrap items-center justify-center gap-3">
+      <a href={route('contact', lang)} class="btn btn-ember" data-magnetic>{s.cta.audit} <span class="arrow" aria-hidden="true">→</span></a>
+      <a href={`mailto:${profile.email}`} class="btn btn-ghost">{s.cta.email}</a>
+    </div>
+  </div>
+</section>

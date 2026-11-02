@@ -1,0 +1,67 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import WorkGrid from '@/components/sections/WorkGrid.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { cases } from '@/data/cases';
+import { profile, experience, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route } from '@/data/routes.mjs';
+import { t } from '@/i18n/ui';
+import { img } from '@/lib/images';
+import { graph, personNode, webPageNode, breadcrumbNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const title = it ? 'Casi studio di AI e machine learning' : 'AI & machine learning case studies';
+const description = it
+  ? 'Casi studio di Michelangelo Amoruso Manzari: machine learning per sinistri assicurativi (Groupama), agentic AI (Imbued), rilevamento frodi (INAIL), computer vision per il riciclo, LLM per le email, previsione dei consumi elettrici.'
+  : 'Case studies by Michelangelo Amoruso Manzari: machine learning for insurance claims (Groupama), agentic AI (Imbued), fraud detection (INAIL), computer vision for recycling, LLM email automation and electricity forecasting.';
+const earlier = experience.filter((r) => ['alecsandria', 'immoveo'].includes(r.id));
+const jsonld = graph(
+  personNode(lang),
+  {
+    ...webPageNode({ url: route('work', lang), name: title, description, lang, type: 'CollectionPage', dateModified: LAST_UPDATED }),
+    mainEntity: { '@type': 'ItemList', itemListElement: cases.map((c, i) => ({ '@type': 'ListItem', position: i + 1, url: `https://michelangeloam.github.io${c.url(lang)}`, name: c.title[lang] })) },
+  },
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.work, url: route('work', lang) }]),
+);
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader
+    lang={lang}
+    eyebrow={s.nav.work}
+    title={it ? 'Dati reali, vincoli reali,' : 'Real data, real constraints,'}
+    accent={it ? 'in produzione.' : 'shipped.'}
+    lede={it ? 'Sei progetti di AI e machine learning in assicurazioni, pubblica amministrazione, energia, riciclo e piattaforme AI, più i prodotti che ho costruito per conto mio.' : 'Six AI and machine learning projects across insurance, the public sector, energy, recycling and AI platforms, plus the products I build on my own.'}
+    crumbs={[{ name: s.nav.work }]}
+    image={img('case-agents')}
+  />
+  <WorkGrid lang={lang} headingLevel="h2" />
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x pb-24">
+      <h2 class="h3">{it ? 'Esperienze precedenti' : 'Earlier work'}</h2>
+      <ul class="mt-6 grid gap-4 md:grid-cols-2">
+        {earlier.map((r) => (
+          <li class="card p-6">
+            <p class="mono text-[0.68rem] text-ash">{r.org} · {r.period[lang]}</p>
+            <p class="mt-2 text-lg font-medium tracking-tight">{r.title[lang]}</p>
+            <p class="mt-2 text-sm text-ash">{r.bullets[lang][0]}</p>
+            <ul class="mt-4 flex flex-wrap gap-1.5">{r.stack.map((x) => <li class="chip">{x}</li>)}</ul>
+          </li>
+        ))}
+        {profile.apps.map((app) => (
+          <li class="card p-6">
+            <p class="mono text-[0.68rem] text-ash">iOS · App Store</p>
+            <p class="mt-2 text-lg font-medium tracking-tight"><a href={app.url} target="_blank" rel="noopener" class="hover:text-ember">{app.name} ↗</a></p>
+            <p class="mt-2 text-sm text-ash">{app.desc[lang]}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  <CTABand lang={lang} />
+</Base>

@@ -1,0 +1,131 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { profile, experience, education, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route } from '@/data/routes.mjs';
+import { t, formatDate } from '@/i18n/ui';
+import { photo, img } from '@/lib/images';
+import { homeCopy } from '@/data/home';
+import { graph, personNode, webPageNode, breadcrumbNode, ID } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const h = homeCopy(lang);
+const title = it ? 'Michelangelo Amoruso Manzari · AI & ML Engineer a Roma' : 'Michelangelo Amoruso Manzari · AI & ML Engineer, Rome';
+const description = it
+  ? 'Michelangelo Amoruso Manzari è un Senior AI & Machine Learning Engineer di Roma: machine learning per i sinistri Groupama, agentic AI, rilevamento frodi INAIL, computer vision e LLM. Laurea magistrale alla Sapienza.'
+  : 'Michelangelo Amoruso Manzari is a Senior AI & Machine Learning Engineer based in Rome, Italy: insurance-claims ML for Groupama, agentic AI, fraud detection for INAIL, computer vision and LLMs. MSc at Sapienza.';
+const bio = it
+  ? [
+      'Michelangelo Amoruso Manzari è un Senior AI & Machine Learning Engineer con base a Roma. Dal 2020 costruisce prodotti basati sui dati: prima una piattaforma di data mining per una proptech svizzera, poi software enterprise, data science e AI per assicurazioni, pubblica amministrazione, energia e piattaforme AI.',
+      'Oggi è il principale sviluppatore machine learning nella modernizzazione del processo sinistri di Groupama Assicurazioni con Alecsandria Digital, dove coordina oltre 20 persone in 3 aziende. In precedenza ha progettato il cuore di agentic AI della piattaforma Imbued, guidandone anche la divisione IT come project manager, e in AlmavivA ha lavorato su rilevamento frodi per INAIL, computer vision per un progetto di ricerca europeo, LLM per le email e previsione dei consumi elettrici.',
+      'Ha studiato Ingegneria Informatica al Politecnico di Milano e all’Università Politecnica delle Marche, ha conseguito un Master in AI/ML con Datamasters e sta completando una laurea magistrale in Engineering in Computer Science alla Sapienza. Lavora in italiano, inglese e spagnolo.',
+    ]
+  : [
+      'Michelangelo Amoruso Manzari is a Senior AI & Machine Learning Engineer based in Rome, Italy. He has been building data products since 2020: first a data-mining platform for a Swiss proptech, then enterprise software, data science and AI for insurance, the public sector, energy and AI platforms.',
+      'Today he is the main machine learning developer on the modernisation of Groupama Assicurazioni’s claims process with Alecsandria Digital, coordinating more than 20 people across 3 companies. Before that he designed the agentic AI core of the Imbued platform, also running its IT division as project manager, and at AlmavivA he worked on fraud detection for INAIL, computer vision for a European research project, LLM email automation and electricity-consumption forecasting.',
+      'He studied Computer Engineering at Politecnico di Milano and the Polytechnic University of Marche, completed a Master in AI/ML with Datamasters and is finishing an MSc in Engineering in Computer Science at Sapienza University of Rome. He works in Italian, English and Spanish.',
+    ];
+const facts = [
+  [it ? 'Ruolo' : 'Role', profile.jobTitle[lang]],
+  [it ? 'Base' : 'Based in', it ? 'Roma, Italia · remoto in UE' : 'Rome, Italy · remote across the EU'],
+  [it ? 'Attualmente' : 'Currently', 'Groupama Assicurazioni × Alecsandria Digital'],
+  [it ? 'Specialità' : 'Focus', it ? 'Agentic AI, LLM, ML predittivo, forecasting, computer vision' : 'Agentic AI, LLMs, predictive ML, forecasting, computer vision'],
+  [it ? 'Lingue' : 'Languages', profile.languages.map((l) => `${l.name[lang]} (${l.level[lang]})`).join(', ')],
+  [it ? 'Formazione' : 'Education', it ? 'Laurea magistrale Sapienza (in corso), Laurea UNIVPM, Master AI/ML' : 'MSc Sapienza (ongoing), BSc UNIVPM, Master in AI/ML'],
+];
+const jsonld = graph(
+  personNode(lang),
+  { '@type': 'ProfilePage', '@id': `https://michelangeloam.github.io${route('about', lang)}#profile`, url: `https://michelangeloam.github.io${route('about', lang)}`, name: title, description, inLanguage: it ? 'it-IT' : 'en', mainEntity: { '@id': ID.person }, dateModified: LAST_UPDATED },
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.about, url: route('about', lang) }]),
+);
+const photos = [photo(2), photo(3), photo(1)];
+---
+
+<Base title={`${title}`} description={description} lang={lang} jsonld={jsonld} type="profile">
+  <PageHeader lang={lang} eyebrow={s.nav.about} title="Michelangelo Amoruso Manzari" lede={profile.tagline[lang]} crumbs={[{ name: s.nav.about }]} image={img('hero-core-desktop')} />
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x grid gap-14 pb-24 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
+      <div class="prose-x !text-lg">
+        {bio.map((p) => <p>{p}</p>)}
+      </div>
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+        <div class="card p-6">
+          <p class="eyebrow">{s.labels.keyFacts}</p>
+          <dl class="mt-5 grid gap-4">
+            {facts.map(([k, v]) => <div><dt class="mono text-[0.62rem] uppercase tracking-[0.12em] text-ash">{k}</dt><dd class="mt-1 text-sm leading-snug">{v}</dd></div>)}
+          </dl>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <a href={profile.links.linkedin} rel="me noopener" target="_blank" class="chip hover:!text-bone">LinkedIn ↗</a>
+            <a href={profile.links.github} rel="me noopener" target="_blank" class="chip hover:!text-bone">GitHub ↗</a>
+            <a href={`mailto:${profile.email}`} class="chip hover:!text-bone">Email</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="surface-light" data-surface="light">
+    <div class="container-x section-y">
+      <p class="eyebrow">{it ? 'Esperienza' : 'Experience'}</p>
+      <h2 class="h2 mt-5">{it ? 'Dal data mining agli agenti AI.' : 'From data mining to AI agents.'}</h2>
+      <ol class="relative mt-12 border-l border-black/10 pl-8">
+        {experience.map((r) => (
+          <li class="relative pb-12 last:pb-0">
+            <span class="absolute -left-[2.35rem] top-1.5 size-3 rounded-full border-2 border-paper bg-ember shadow-[0_0_0_4px_rgb(255_122_26/0.2)]"></span>
+            <p class="mono text-xs text-smoke">{r.period[lang]}{r.orgDetail && ` · ${r.orgDetail[lang]}`}</p>
+            <h3 class="mt-1 text-2xl font-medium tracking-tight">{r.title[lang]}</h3>
+            <p class="text-smoke">{r.org}</p>
+            <ul class="prose-x mt-4 !text-base">{r.bullets[lang].map((b) => <li>{b}</li>)}</ul>
+            <p class="mt-4 flex flex-wrap gap-1.5">{r.stack.map((x) => <span class="chip">{x}</span>)}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x section-y">
+      <div class="grid gap-12 lg:grid-cols-2">
+        <div>
+          <p class="eyebrow">{it ? 'Formazione' : 'Education'}</p>
+          <ul class="mt-6 divide-y divide-white/10 border-y border-white/10">
+            {education.map((e) => <li class="py-5"><p class="mono text-xs text-ash">{e.period[lang]}</p><p class="mt-1 font-medium">{it ? e.orgIt : e.org}</p><p class="text-sm text-ash">{e.title[lang]}</p></li>)}
+          </ul>
+        </div>
+        <div>
+          <p class="eyebrow">{it ? 'Competenze' : 'Skills'}</p>
+          {[
+            [it ? 'Machine learning' : 'Machine learning', profile.skills.ml],
+            ['AI', profile.skills.ai],
+            [it ? 'Ingegneria' : 'Engineering', profile.skills.eng],
+            [it ? 'Delivery' : 'Delivery', profile.skills.delivery],
+          ].map(([k, list]) => (
+            <div class="mt-6">
+              <p class="text-sm font-medium">{k as string}</p>
+              <p class="mt-2 flex flex-wrap gap-1.5">{(list as readonly string[]).map((x) => <span class="chip">{x}</span>)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface-light" data-surface="light">
+    <div class="container-x section-y">
+      <p class="eyebrow">{h.beyond.eyebrow}</p>
+      <h2 class="h2 mt-5">{h.beyond.title}</h2>
+      <p class="lede mt-5">{h.beyond.sub}</p>
+      <div class="mt-10 grid gap-4 md:grid-cols-3">
+        {photos.map((p, i) => p && <Image src={p} alt={h.beyond.photoAlt[[1, 2, 0][i]]} widths={[480, 900]} sizes="(min-width: 768px) 33vw, 100vw" class="aspect-[4/5] w-full rounded-[1.4rem] object-cover" loading="lazy" />)}
+      </div>
+      <p class="mono mt-6 text-xs text-smoke">{s.footer.updated}: {formatDate(LAST_UPDATED, lang)}</p>
+    </div>
+  </section>
+  <CTABand lang={lang} />
+</Base>

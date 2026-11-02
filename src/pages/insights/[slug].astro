@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import Page from '@/components/pages/InsightPost.astro';
+import { INSIGHT_SLUGS } from '@/data/routes.mjs';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('insights', (p) => p.data.lang === 'en');
+  return posts.map((post) => ({ params: { slug: INSIGHT_SLUGS[post.data.key].en }, props: { post } }));
+}
+const { post } = Astro.props;
+---
+<Page lang="en" post={post} />

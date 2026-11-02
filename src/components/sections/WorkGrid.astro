@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import { cases } from '@/data/cases';
+import { img } from '@/lib/images';
+import { t } from '@/i18n/ui';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang; exclude?: string[]; heading?: { eyebrow: string; title: string }; headingLevel?: 'h2' | 'h3'; surface?: 'dark' | 'light' }
+const { lang, exclude = [], heading, headingLevel = 'h2', surface = 'dark' } = Astro.props;
+const s = t(lang);
+const list = cases.filter((c) => !exclude.includes(c.key));
+const H = headingLevel;
+---
+
+<section class:list={[surface === 'dark' ? 'surface-dark' : 'surface-light', 'relative']} data-surface={surface} id="work">
+  <div class="container-x section-y !pt-6">
+    {heading && (
+      <div class="mb-12 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p class="eyebrow reveal">{heading.eyebrow}</p>
+          <H class="h2 reveal mt-5 max-w-2xl">{heading.title}</H>
+        </div>
+      </div>
+    )}
+    <ul class="grid gap-5 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+      {list.map((c) => {
+        const cover = img(c.cover);
+        return (
+          <li class="reveal">
+            <a href={c.url(lang)} class="card spotlight group flex h-full flex-col !rounded-[1.6rem]">
+              <div class="relative aspect-[3/2] overflow-hidden">
+                {cover ? (
+                  <Image src={cover} alt="" widths={[480, 800]} sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw" class="h-full w-full object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]" loading="lazy" />
+                ) : (
+                  <div class="h-full w-full bg-[radial-gradient(circle_at_60%_40%,rgb(139_124_255/0.35),transparent_60%)]"></div>
+                )}
+                <span class="mono absolute left-4 top-4 rounded-full bg-ink/70 px-2.5 py-1 text-[0.65rem] text-bone backdrop-blur">{c.kicker[lang]}</span>
+              </div>
+              <div class="flex flex-1 flex-col p-6">
+                <p class="mono text-[0.68rem] text-[var(--muted)]">{c.client} · {c.year}</p>
+                <h3 class="mt-2 text-xl font-medium leading-snug tracking-tight">{c.title[lang]}</h3>
+                <p class="mt-3 line-clamp-3 text-sm text-[var(--muted)]">{c.tldr[lang]}</p>
+                <span class="mt-auto pt-5 text-sm font-medium">{s.cta.readCase} <span class="inline-block transition-transform group-hover:translate-x-1">→</span></span>
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>

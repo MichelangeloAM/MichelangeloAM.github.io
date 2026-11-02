@@ -1,0 +1,48 @@
+---
+key: scope-ai-agent
+lang: en
+title: How to scope an AI agent project (and what drives the cost)
+description: A practical checklist for scoping an AI agent project, from choosing the task to estimating cost, by Rome-based AI engineer Michelangelo Amoruso Manzari.
+date: 2026-11-02
+cover: case-agents
+draft: true
+tags: [Agentic AI, AI strategy, Project management]
+---
+
+**Short answer:** scope an AI agent around one repetitive, multi-step task with a clear definition of “done”, reliable tools to act on your systems, and a measurable KPI. Cost is driven far more by integration and evaluation than by the language model itself.
+
+## 1. Pick a task, not a technology
+
+The best first agent replaces a sequence of steps that people already perform the same way every day: read a request, look something up in two systems, fill a form, ask for approval. If you cannot write the steps down, the agent cannot follow them either.
+
+Good candidates share three traits:
+
+- **High volume:** dozens or hundreds of runs per day.
+- **Clear outcome:** you can tell whether a run succeeded.
+- **Bounded risk:** mistakes can be caught before they reach a customer.
+
+## 2. Build the tools before the prompts
+
+An agent is only as reliable as the functions it can call. Before any prompting, I write deterministic tools over your systems (search a record, create a draft, check a policy) with validation and clear error messages. This is where most of the engineering effort goes, and where most demo-grade agents fall apart.
+
+## 3. Decide where a human stays in the loop
+
+List every action the agent can take and mark the irreversible ones: payments, customer emails, record deletions. Those need an approval step, at least at the start. Everything else can run automatically with logging.
+
+## 4. Measure it like a product
+
+Create an evaluation set of real past cases with the correct outcome. Run it on every change. Track task completion rate, escalation rate and time saved per run. Without this, you are guessing.
+
+## 5. What drives the cost
+
+| Driver | Why it matters |
+| --- | --- |
+| Number and quality of integrations | Each system the agent touches needs a robust tool. |
+| Required accuracy | Higher accuracy means more evaluation data and iterations. |
+| Human review | Approval flows and UI for reviewers add scope. |
+| Data residency | Private or EU-hosted models change the architecture. |
+| Model usage | Usually the smallest line item once the design is efficient. |
+
+## A sensible first step
+
+A two-week [AI Opportunity Audit](/services/ai-opportunity-audit/) is usually enough to pick the right task, check the data and systems involved, and produce a pilot plan with a realistic budget.

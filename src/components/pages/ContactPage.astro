@@ -1,0 +1,127 @@
+---
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { dataTypes } from '@/data/use-cases';
+import { services } from '@/data/services';
+import { route } from '@/data/routes.mjs';
+import { t } from '@/i18n/ui';
+import { img } from '@/lib/images';
+import { graph, personNode, webPageNode, breadcrumbNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const title = it ? 'Contatti e AI Opportunity Audit' : 'Contact & AI Opportunity Audit';
+const description = it
+  ? 'Scrivi a Michelangelo Amoruso Manzari, AI & ML Engineer a Roma: raccontami i tuoi dati e il KPI che vuoi migliorare. Progetti in Italia, in Europa e da remoto.'
+  : 'Contact Michelangelo Amoruso Manzari, AI & ML Engineer in Rome: tell me about your data and the KPI you want to improve. Projects across Italy, Europe and remote.';
+const F = it
+  ? { name: 'Nome', email: 'Email di lavoro', company: 'Azienda', service: 'Di cosa hai bisogno', data: 'Dati che hai', message: 'Il numero che vuoi muovere', placeholder: 'Es. “Gestiamo 40.000 sinistri l’anno e vorremmo ridurre i tempi di stima.”', send: 'Invia messaggio', sending: 'Invio…', ok: 'Grazie! Il messaggio è arrivato, ti rispondo personalmente.', err: 'Invio non riuscito. Scrivimi direttamente a', privacy: 'Uso questi dati solo per risponderti.', direct: 'Preferisci scrivere direttamente?', unsure: 'Non sono sicuro' }
+  : { name: 'Name', email: 'Work email', company: 'Company', service: 'What you need', data: 'Data you have', message: 'The number you want to move', placeholder: 'E.g. “We handle 40,000 claims a year and want to cut estimate time.”', send: 'Send message', sending: 'Sending…', ok: 'Thank you! Your message arrived; I’ll reply personally.', err: 'Sending failed. Email me directly at', privacy: 'I only use this data to reply to you.', direct: 'Prefer to write directly?', unsure: 'Not sure yet' };
+const jsonld = graph(
+  personNode(lang),
+  webPageNode({ url: route('contact', lang), name: title, description, lang, type: 'ContactPage', dateModified: LAST_UPDATED }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.contact, url: route('contact', lang) }]),
+);
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader lang={lang} eyebrow={s.nav.contact} title={it ? 'Raccontami dei tuoi dati.' : 'Tell me about your data.'} accent={it ? 'Partiamo da lì.' : 'We’ll start there.'} lede={description} crumbs={[{ name: s.nav.contact }]} image={img('case-email')} />
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x grid gap-12 pb-28 lg:grid-cols-[1.3fr_0.7fr] lg:gap-20">
+      <form class="card grid gap-5 p-6 md:p-10" data-contact novalidate data-ok={F.ok} data-err={F.err} data-sending={F.sending} data-email={profile.email}>
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="field"><span>{F.name}</span><input name="name" required autocomplete="name" /></label>
+          <label class="field"><span>{F.email}</span><input name="email" type="email" required autocomplete="email" /></label>
+        </div>
+        <label class="field"><span>{F.company}</span><input name="company" autocomplete="organization" /></label>
+        <div class="grid gap-5 md:grid-cols-2">
+          <label class="field"><span>{F.service}</span>
+            <select name="service">{services.map((sv) => <option value={sv.name.en}>{sv.name[lang]}</option>)}<option value="Not sure">{F.unsure}</option></select>
+          </label>
+          <label class="field"><span>{F.data}</span>
+            <select name="data">{dataTypes.map((d) => <option value={d.label.en}>{d.label[lang]}</option>)}<option value="Not sure">{F.unsure}</option></select>
+          </label>
+        </div>
+        <label class="field"><span>{F.message}</span><textarea name="message" rows="5" required placeholder={F.placeholder}></textarea></label>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
+        <div class="flex flex-wrap items-center gap-4">
+          <button type="submit" class="btn btn-ember" data-magnetic>{F.send} <span class="arrow" aria-hidden="true">→</span></button>
+          <p class="mono text-[0.68rem] text-ash">{F.privacy}</p>
+        </div>
+        <p class="text-sm" role="status" aria-live="polite" data-contact-status></p>
+      </form>
+
+      <aside class="grid content-start gap-4">
+        <div class="card p-6">
+          <p class="eyebrow">{F.direct}</p>
+          <a href={`mailto:${profile.email}`} class="mt-4 block break-all text-xl font-medium tracking-tight hover:text-ember">{profile.email}</a>
+          <a href={profile.links.linkedin} target="_blank" rel="me noopener" class="mt-3 block text-sm text-ash hover:text-bone">LinkedIn ↗</a>
+        </div>
+        <div class="card p-6">
+          <p class="eyebrow">{it ? 'Dove' : 'Where'}</p>
+          <p class="mt-4 text-sm leading-relaxed text-bone/85">{it ? 'Roma, Italia. Lavoro da remoto con clienti in Italia e in Europa, e in presenza quando serve.' : 'Rome, Italy. I work remotely with clients across Italy and Europe, and on site when it helps.'}</p>
+        </div>
+        <div class="card p-6">
+          <p class="eyebrow">{it ? 'Cosa succede dopo' : 'What happens next'}</p>
+          <ol class="mt-4 grid gap-3 text-sm text-bone/85">
+            <li><span class="mono text-ember">01</span> {it ? 'Leggo il tuo messaggio e preparo qualche domanda.' : 'I read your message and prepare a few questions.'}</li>
+            <li><span class="mono text-ember">02</span> {it ? 'Call di 30 minuti su dati, processo e obiettivi.' : '30-minute call on data, process and goals.'}</li>
+            <li><span class="mono text-ember">03</span> {it ? 'Proposta chiara: audit, pilota o un consiglio onesto.' : 'A clear proposal: audit, pilot, or honest advice.'}</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .field { display: grid; gap: 0.5rem; }
+  .field > span { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ash); }
+  .field input, .field select, .field textarea {
+    width: 100%; border-radius: 0.9rem; border: 1px solid rgb(255 255 255 / 0.12); background: rgb(255 255 255 / 0.04);
+    padding: 0.85rem 1rem; font-size: 1rem; color: var(--color-bone); transition: border-color 0.2s, background 0.2s;
+  }
+  .field select option { background: #121215; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--color-ember); background: rgb(255 122 26 / 0.06); }
+  .field textarea::placeholder { color: rgb(155 151 143 / 0.7); }
+</style>
+
+<script>
+  import emailjs from '@emailjs/browser';
+  // Same EmailJS service/template as the previous site (public key is meant to be public).
+  const SERVICE_ID = 'service_z873o3a';
+  const TEMPLATE_ID = 'template_61ffjnj';
+  const PUBLIC_KEY = 'voivAF3zxUVrmTCOa';
+
+  const form = document.querySelector<HTMLFormElement>('[data-contact]');
+  const status = form?.querySelector<HTMLElement>('[data-contact-status]');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    if (data.website) return; // honeypot
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const label = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = form.dataset.sending ?? '…';
+    try {
+      await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+        from_name: data.name,
+        from_email: data.email,
+        subject: `[Portfolio] ${data.service} · ${data.company || 'no company'}`,
+        message: `Company: ${data.company}\nService: ${data.service}\nData: ${data.data}\nPage language: ${document.documentElement.lang}\n\n${data.message}`,
+      }, { publicKey: PUBLIC_KEY });
+      form.reset();
+      if (status) { status.textContent = form.dataset.ok ?? ''; status.className = 'text-sm text-mint'; }
+    } catch {
+      if (status) { status.innerHTML = `${form.dataset.err} <a class="underline" href="mailto:${form.dataset.email}">${form.dataset.email}</a>`; status.className = 'text-sm text-ember'; }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = label;
+    }
+  });
+</script>

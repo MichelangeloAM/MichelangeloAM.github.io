@@ -1,0 +1,8 @@
+/* TEAM */
+Michelangelo Amoruso Manzari: Senior AI & ML Engineer, Rome, Italy
+Contact: michelangeloam98 [at] gmail.com
+LinkedIn: https://www.linkedin.com/in/michelangelo-amoruso-manzari-011114141/
+
+/* SITE */
+Built with: Astro, Tailwind CSS, GSAP, Lenis
+Visuals: generated with AI under the author's art direction; photography by the author.

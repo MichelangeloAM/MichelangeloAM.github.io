@@ -1,0 +1,53 @@
+---
+import Base from '@/layouts/Base.astro';
+import Hero from '@/components/sections/Hero.astro';
+import MarqueeStats from '@/components/sections/MarqueeStats.astro';
+import DataFlow from '@/components/sections/DataFlow.astro';
+import CapabilityScroll from '@/components/sections/CapabilityScroll.astro';
+import ImpactTree from '@/components/lab/ImpactTree.astro';
+import MLLab from '@/components/lab/MLLab.astro';
+import UseCaseFinder from '@/components/lab/UseCaseFinder.astro';
+import ProcessPinned from '@/components/sections/ProcessPinned.astro';
+import IndustryRail from '@/components/sections/IndustryRail.astro';
+import FeaturedCase from '@/components/sections/FeaturedCase.astro';
+import WorkGrid from '@/components/sections/WorkGrid.astro';
+import ResearchBeyond from '@/components/sections/ResearchBeyond.astro';
+import FAQ from '@/components/sections/FAQ.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { homeCopy } from '@/data/home';
+import { graph, personNode, websiteNode, professionalServiceNode, webPageNode, faqNode } from '@/lib/schema';
+import { route } from '@/data/routes.mjs';
+import { LAST_UPDATED } from '@/data/profile';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang);
+const jsonld = graph(
+  personNode(lang),
+  websiteNode(lang),
+  professionalServiceNode(lang),
+  { ...webPageNode({ url: route('home', lang), name: c.meta.title, description: c.meta.description, lang, dateModified: LAST_UPDATED }), mainEntity: { '@id': 'https://michelangeloam.github.io/#person' } },
+  faqNode(c.faq.items),
+);
+---
+
+<Base title={c.meta.title} description={c.meta.description} lang={lang} jsonld={jsonld} type="profile">
+  <Hero lang={lang} />
+  <MarqueeStats lang={lang} />
+  <DataFlow lang={lang} />
+  <div class="fade-to-light" aria-hidden="true"></div>
+  <CapabilityScroll lang={lang} />
+  <ImpactTree lang={lang} />
+  <MLLab lang={lang} />
+  <UseCaseFinder lang={lang} />
+  <div class="fade-to-dark" aria-hidden="true"></div>
+  <ProcessPinned lang={lang} />
+  <IndustryRail lang={lang} />
+  <FeaturedCase lang={lang} />
+  <WorkGrid lang={lang} exclude={['groupama-claims']} heading={{ eyebrow: c.work.eyebrow, title: c.work.title }} />
+  <ResearchBeyond lang={lang} />
+  <FAQ eyebrow={c.faq.eyebrow} title={c.faq.title} items={c.faq.items} />
+  <div class="fade-to-dark" aria-hidden="true"></div>
+  <CTABand lang={lang} />
+</Base>

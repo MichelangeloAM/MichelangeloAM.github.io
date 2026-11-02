@@ -1,0 +1,123 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import FAQ from '@/components/sections/FAQ.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { dataTypes, industries, useCases } from '@/data/use-cases';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route, caseUrl } from '@/data/routes.mjs';
+import { t, formatDate } from '@/i18n/ui';
+import { dataTile, img } from '@/lib/images';
+import { graph, personNode, webPageNode, breadcrumbNode, faqNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const title = it ? '15 casi d’uso AI per i dati aziendali' : '15 AI use cases for company data';
+const description = it
+  ? 'Come usare i dati aziendali con l’AI: 15 casi d’uso concreti organizzati per tipo di dato (email, documenti, immagini, transazioni, serie temporali, CRM), con modello, KPI e tempi tipici.'
+  : 'How to use company data with AI: 15 concrete use cases organised by data type (emails, documents, images, transactions, time series, CRM), each with the model, the KPI it moves and a typical timeline.';
+const indLabel = (k: string) => industries.find((i) => i.key === k)!.label[lang];
+const faqs = it
+  ? [
+      { q: 'Qual è il caso d’uso AI con il ritorno più rapido?', a: 'Di solito il triage di email e documenti con gli LLM: i dati esistono già, l’integrazione è leggera e il risparmio di tempo si misura in poche settimane.' },
+      { q: 'Quali dati servono per iniziare con il machine learning?', a: 'Uno storico di casi con l’esito che vuoi prevedere (per esempio il costo finale di un sinistro o se una pratica era fraudolenta). Qualche migliaio di record ben etichettati è spesso sufficiente.' },
+      { q: 'Meglio un modello su misura o un prodotto AI già pronto?', a: 'Se il problema è generico (trascrizione, traduzione) conviene un prodotto. Se dipende dai tuoi dati e processi (costi, frodi, domanda), un modello su misura di solito vince su accuratezza e costo nel tempo.' },
+    ]
+  : [
+      { q: 'Which AI use case pays back fastest?', a: 'Usually LLM triage of emails and documents: the data already exists, integration is light and time savings are measurable within weeks.' },
+      { q: 'What data do I need to start with machine learning?', a: 'A history of cases with the outcome you want to predict (for example the final cost of a claim, or whether a case was fraudulent). A few thousand well-labelled records are often enough.' },
+      { q: 'Custom model or off-the-shelf AI product?', a: 'If the problem is generic (transcription, translation) buy a product. If it depends on your own data and processes (costs, fraud, demand), a custom model usually wins on accuracy and on cost over time.' },
+    ];
+const jsonld = graph(
+  personNode(lang),
+  {
+    ...webPageNode({ url: route('useCases', lang), name: title, description, lang, type: 'CollectionPage', dateModified: LAST_UPDATED }),
+    mainEntity: { '@type': 'ItemList', name: title, numberOfItems: useCases.length, itemListElement: useCases.map((u, i) => ({ '@type': 'ListItem', position: i + 1, name: u.title[lang], description: `${u.problem[lang]} ${u.model[lang]}. ${u.kpi[lang]}` })) },
+  },
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.useCases, url: route('useCases', lang) }]),
+  faqNode(faqs),
+);
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader
+    lang={lang}
+    eyebrow={s.nav.useCases}
+    title={it ? 'Cosa può fare l’AI' : 'What AI can do'}
+    accent={it ? 'con i dati che hai già.' : 'with the data you already have.'}
+    lede={it ? `${useCases.length} casi d’uso concreti, ordinati per tipo di dato. Per ognuno: il problema, il modello, il KPI che muove e i tempi tipici. Quelli segnati ✓ li ho già realizzati.` : `${useCases.length} concrete use cases, organised by the kind of data you own. For each: the problem, the model, the KPI it moves and a typical timeline. The ones marked ✓ I have already delivered.`}
+    crumbs={[{ name: s.nav.useCases }]}
+    image={img('hero-core-desktop')}
+  >
+    <nav class="mt-9 flex flex-wrap gap-2" aria-label={s.labels.onThisPage}>
+      {dataTypes.map((d) => <a href={`#${d.key}`} class="chip !px-4 !py-2 !text-[0.78rem] hover:!text-bone">{d.label[lang]}</a>)}
+    </nav>
+  </PageHeader>
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x pb-24">
+      <aside class="card max-w-3xl p-6 md:p-8">
+        <p class="eyebrow">{s.labels.tldr}</p>
+        <p class="mt-4 text-lg leading-relaxed text-bone/90">
+          {it
+            ? 'Email e ticket → automazione con LLM. Documenti e PDF → document AI e RAG. Immagini → computer vision. Transazioni e storici → modelli predittivi e antifrode. Serie temporali → forecasting e manutenzione predittiva. Dati CRM → churn, lead scoring e segmentazione. Si parte sempre da un KPI.'
+            : 'Emails & tickets → LLM automation. Documents & PDFs → document AI and RAG. Images → computer vision. Transactions & records → predictive and fraud models. Time series → forecasting and predictive maintenance. CRM data → churn, lead scoring and segmentation. Always start from a KPI.'}
+        </p>
+      </aside>
+
+      {dataTypes.map((d) => {
+        const list = useCases.filter((u) => u.data === d.key);
+        const tile = dataTile(d.tile);
+        return (
+          <section id={d.key} class="mt-20 scroll-mt-28">
+            <div class="flex items-center gap-4">
+              {tile && <Image src={tile} alt="" width={112} height={112} class="size-14 rounded-2xl object-cover" loading="lazy" />}
+              <div>
+                <h2 class="h3">{it ? `${d.label.it}: cosa può fare l’AI` : `${d.label.en}: what AI can do`}</h2>
+                <p class="mono mt-1 text-xs text-ash">{d.hint[lang]}</p>
+              </div>
+            </div>
+            <div class="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {list.map((u) => (
+                <article class="card flex flex-col p-6" id={`uc-${u.id}`}>
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-xl font-medium leading-snug tracking-tight">{u.title[lang]}</h3>
+                    {u.proof && <a href={caseUrl(u.proof as any, lang)} class="mono shrink-0 rounded-full bg-mint/15 px-2 py-1 text-[0.62rem] text-mint">✓ {it ? 'fatto' : 'done'}</a>}
+                  </div>
+                  <p class="mt-3 text-sm text-ash">{u.problem[lang]}</p>
+                  <dl class="mt-5 grid gap-2.5 text-sm">
+                    <div><dt class="mono text-[0.6rem] uppercase tracking-[0.12em] text-ash">{it ? 'Modello' : 'Model'}</dt><dd class="mt-0.5">{u.model[lang]}</dd></div>
+                    <div><dt class="mono text-[0.6rem] uppercase tracking-[0.12em] text-ash">KPI</dt><dd class="mt-0.5 text-ember-2">{u.kpi[lang]}</dd></div>
+                    <div><dt class="mono text-[0.6rem] uppercase tracking-[0.12em] text-ash">{it ? 'Tempi' : 'Timeline'}</dt><dd class="mt-0.5">{u.weeks} {it ? 'settimane' : 'weeks'}</dd></div>
+                  </dl>
+                  <p class="mt-auto flex flex-wrap gap-1.5 pt-5">{u.industries.slice(0, 4).map((k) => <span class="chip">{indLabel(k)}</span>)}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <section class="mt-24">
+        <h2 class="h3">{it ? 'Tabella riassuntiva' : 'Summary table'}</h2>
+        <div class="prose-x mt-6 overflow-x-auto">
+          <table>
+            <thead><tr><th>{it ? 'Caso d’uso' : 'Use case'}</th><th>{it ? 'Dati' : 'Data'}</th><th>{it ? 'Modello' : 'Model'}</th><th>KPI</th><th>{it ? 'Settimane' : 'Weeks'}</th></tr></thead>
+            <tbody>
+              {useCases.map((u) => (
+                <tr><td><strong>{u.title[lang]}</strong></td><td>{dataTypes.find((d) => d.key === u.data)!.label[lang]}</td><td>{u.model[lang]}</td><td>{u.kpi[lang]}</td><td>{u.weeks}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="mono mt-6 text-xs text-ash">{s.footer.updated}: {formatDate(LAST_UPDATED, lang)} · {it ? 'I tempi sono indicativi e dipendono dalla maturità dei dati.' : 'Timelines are indicative and depend on data readiness.'}</p>
+      </section>
+    </div>
+  </section>
+
+  <FAQ eyebrow={s.labels.faq} title={it ? 'Domande sui casi d’uso.' : 'Use-case questions.'} items={faqs} />
+  <CTABand lang={lang} />
+</Base>

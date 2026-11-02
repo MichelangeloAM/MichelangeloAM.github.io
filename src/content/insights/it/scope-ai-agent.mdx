@@ -1,0 +1,48 @@
+---
+key: scope-ai-agent
+lang: it
+title: Come impostare un progetto di agenti AI (e cosa ne determina il costo)
+description: Una checklist pratica per impostare un progetto di agenti AI, dalla scelta del compito alla stima dei costi, di Michelangelo Amoruso Manzari, AI engineer a Roma.
+date: 2026-11-02
+cover: case-agents
+draft: true
+tags: [Agentic AI, Strategia AI, Project management]
+---
+
+**In breve:** un agente AI va costruito intorno a un solo compito ripetitivo e multi-step, con una definizione chiara di “fatto”, strumenti affidabili per agire sui tuoi sistemi e un KPI misurabile. Il costo dipende molto più da integrazioni e valutazione che dal modello linguistico.
+
+## 1. Scegli un compito, non una tecnologia
+
+Il primo agente ideale sostituisce una sequenza di passaggi che le persone già eseguono ogni giorno nello stesso modo: leggere una richiesta, cercare un dato in due sistemi, compilare un modulo, chiedere un’approvazione. Se non riesci a scrivere i passaggi, l’agente non potrà seguirli.
+
+I buoni candidati hanno tre caratteristiche:
+
+- **Volumi alti:** decine o centinaia di esecuzioni al giorno.
+- **Esito chiaro:** si capisce se un’esecuzione è riuscita.
+- **Rischio contenuto:** gli errori si possono intercettare prima che arrivino al cliente.
+
+## 2. Prima gli strumenti, poi i prompt
+
+Un agente è affidabile quanto le funzioni che può chiamare. Prima di qualsiasi prompt scrivo tool deterministici sui tuoi sistemi (cercare un record, creare una bozza, verificare una polizza) con validazione e messaggi d’errore chiari. È qui che va la maggior parte del lavoro di ingegneria, ed è qui che gli agenti “da demo” si rompono.
+
+## 3. Decidi dove resta l’umano
+
+Elenca ogni azione che l’agente può compiere e segna quelle irreversibili: pagamenti, email ai clienti, cancellazioni. Queste richiedono un’approvazione, almeno all’inizio. Il resto può girare in automatico con log completi.
+
+## 4. Misuralo come un prodotto
+
+Crea un set di valutazione con casi reali del passato e il loro esito corretto, ed eseguilo a ogni modifica. Misura tasso di completamento, tasso di escalation e tempo risparmiato per esecuzione. Senza questo, si va a intuito.
+
+## 5. Cosa determina il costo
+
+| Fattore | Perché conta |
+| --- | --- |
+| Numero e qualità delle integrazioni | Ogni sistema toccato dall’agente richiede un tool robusto. |
+| Accuratezza richiesta | Più accuratezza significa più dati di valutazione e iterazioni. |
+| Revisione umana | Flussi di approvazione e interfacce per i revisori aumentano il perimetro. |
+| Residenza dei dati | Modelli privati o in UE cambiano l’architettura. |
+| Utilizzo del modello | Di solito la voce più piccola, se il design è efficiente. |
+
+## Un primo passo sensato
+
+Un [AI Opportunity Audit](/it/servizi/audit-opportunita-ai/) di due settimane di solito basta per scegliere il compito giusto, verificare dati e sistemi coinvolti e preparare un piano pilota con un budget realistico.

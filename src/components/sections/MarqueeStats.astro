@@ -1,0 +1,50 @@
+---
+import { homeCopy } from '@/data/home';
+import { marquee, stackMarquee, stats } from '@/data/profile';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang);
+const row = [...marquee, ...marquee];
+const row2 = [...stackMarquee, ...stackMarquee];
+---
+
+<section class="surface-dark relative border-y border-white/10 py-10" data-surface="dark" aria-label={c.marquee.label}>
+  <p class="container-x mono mb-6 text-[0.7rem] uppercase tracking-[0.14em] text-ash">{c.marquee.label}</p>
+  <div class="mask-fade-x group overflow-hidden">
+    <ul class="flex w-max animate-[var(--animate-marquee)] items-center gap-14 pr-14 group-hover:[animation-play-state:paused]">
+      {row.map((name, i) => (
+        <li class="whitespace-nowrap text-2xl font-medium tracking-tight text-bone/55 md:text-3xl" aria-hidden={i >= marquee.length ? 'true' : undefined}>{name}</li>
+      ))}
+    </ul>
+  </div>
+  <div class="mask-fade-x group mt-6 overflow-hidden">
+    <ul class="flex w-max animate-[var(--animate-marquee)] items-center gap-3 pr-3 [animation-direction:reverse] [animation-duration:52s] group-hover:[animation-play-state:paused]">
+      {row2.map((name, i) => (
+        <li class="chip" aria-hidden={i >= stackMarquee.length ? 'true' : undefined}>{name}</li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<section class="surface-dark relative" data-surface="dark">
+  <div class="container-x section-y !pb-16">
+    <div class="grid gap-10 md:grid-cols-[0.9fr_2fr] md:items-end">
+      <div>
+        <p class="eyebrow reveal">{c.stats.eyebrow}</p>
+        <h2 class="h2 reveal mt-5">{c.stats.title}</h2>
+      </div>
+      <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 md:grid-cols-4" data-reveal-group>
+        {stats.map((s) => (
+          <div class="reveal flex flex-col justify-between gap-6 bg-ink p-6 md:min-h-52">
+            <dt class="order-2 text-sm leading-snug text-ash">{s.label[lang]}</dt>
+            <dd class="order-1 text-5xl font-medium tracking-[-0.05em] md:text-6xl">
+              <span data-count={s.value} data-from="0">{s.value}</span><span class="text-ember">{s.suffix}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>

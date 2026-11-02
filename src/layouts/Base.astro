@@ -1,0 +1,64 @@
+---
+import { Font } from 'astro:assets';
+import '@/styles/global.css';
+import SEO from '@/components/seo/SEO.astro';
+import Nav from '@/components/ui/Nav.astro';
+import Footer from '@/components/ui/Footer.astro';
+import { htmlLang, t } from '@/i18n/ui';
+import type { Lang } from '@/data/profile';
+
+interface Props {
+  title: string;
+  description: string;
+  lang: Lang;
+  ogImage?: string;
+  type?: 'website' | 'article' | 'profile';
+  noindex?: boolean;
+  jsonld?: unknown;
+  published?: string;
+  modified?: string;
+  surface?: 'dark' | 'light';
+}
+
+const { lang, surface = 'dark', ...seo } = Astro.props;
+const path = Astro.url.pathname;
+const s = t(lang);
+// Optional: paste the Google Search Console / Bing verification tokens here after verifying ownership.
+const GSC_TOKEN = '';
+const BING_TOKEN = '';
+---
+
+<!doctype html>
+<html lang={htmlLang(lang)} dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-geist-mono" />
+    <Font cssVariable="--font-instrument" />
+    <SEO {...seo} lang={lang} path={path} />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    {GSC_TOKEN && <meta name="google-site-verification" content={GSC_TOKEN} />}
+    {BING_TOKEN && <meta name="msvalidate.01" content={BING_TOKEN} />}
+  </head>
+  <body class="grain" data-surface={surface}>
+    <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] btn btn-primary">{s.skip}</a>
+    <Nav lang={lang} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <script>
+      import { initMotion } from '@/scripts/motion';
+      initMotion();
+    </script>
+  </body>
+</html>

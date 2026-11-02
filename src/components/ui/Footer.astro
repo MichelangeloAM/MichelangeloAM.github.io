@@ -1,0 +1,56 @@
+---
+import { t, formatDate } from '@/i18n/ui';
+import { route } from '@/data/routes.mjs';
+import { profile, LAST_UPDATED } from '@/data/profile';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const site = [
+  { href: route('work', lang), label: s.nav.work },
+  { href: route('services', lang), label: s.nav.services },
+  { href: route('useCases', lang), label: s.nav.useCases },
+  { href: route('research', lang), label: s.nav.research },
+  { href: route('about', lang), label: s.nav.about },
+  { href: route('insights', lang), label: s.nav.insights },
+  { href: route('contact', lang), label: s.nav.contact },
+];
+const elsewhere = [
+  { href: profile.links.linkedin, label: 'LinkedIn' },
+  { href: profile.links.github, label: 'GitHub' },
+  { href: profile.links.medium, label: 'Medium' },
+  { href: profile.links.unsplash, label: 'Unsplash' },
+  { href: profile.links.appstore, label: 'App Store' },
+];
+const year = new Date(LAST_UPDATED).getFullYear();
+---
+
+<footer class="surface-dark relative overflow-hidden border-t border-white/10" data-surface="dark">
+  <div class="container-x grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr] md:py-20">
+    <div class="max-w-sm">
+      <p class="text-2xl font-medium tracking-tight">Michelangelo Amoruso Manzari</p>
+      <p class="mt-3 text-sm leading-relaxed text-ash">{s.footer.blurb}</p>
+      <a href={`mailto:${profile.email}`} class="mono mt-6 inline-block text-sm text-bone underline decoration-ember underline-offset-4">{profile.email}</a>
+    </div>
+    <nav aria-label={s.footer.sitemap}>
+      <p class="eyebrow">{s.footer.sitemap}</p>
+      <ul class="mt-5 grid gap-2.5 text-sm">
+        {site.map((l) => <li><a class="text-ash transition-colors hover:text-bone" href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <nav aria-label={s.footer.elsewhere}>
+      <p class="eyebrow">{s.footer.elsewhere}</p>
+      <ul class="mt-5 grid gap-2.5 text-sm">
+        {elsewhere.map((l) => <li><a class="text-ash transition-colors hover:text-bone" href={l.href} rel="me noopener" target="_blank">{l.label} <span aria-hidden="true">↗</span></a></li>)}
+      </ul>
+    </nav>
+  </div>
+  <div class="container-x flex flex-col gap-2 border-t border-white/10 py-6 text-xs text-ash md:flex-row md:items-center md:justify-between">
+    <p>© {year} {profile.name}. {s.footer.rights} · Rome, Italy</p>
+    <p>{s.footer.updated}: <time datetime={LAST_UPDATED}>{formatDate(LAST_UPDATED, lang)}</time> · {s.footer.madeWith}</p>
+  </div>
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 1000 150" class="pointer-events-none block w-full select-none px-[var(--gutter)]">
+    <text x="0" y="126" font-size="160" font-weight="600" textLength="1000" lengthAdjust="spacingAndGlyphs" fill="#ffffff" fill-opacity="0.05" font-family="Geist, system-ui, sans-serif">data → impact</text>
+  </svg>
+</footer>

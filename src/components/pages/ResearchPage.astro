@@ -1,0 +1,93 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { education, profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route, caseUrl, serviceUrl } from '@/data/routes.mjs';
+import { t } from '@/i18n/ui';
+import { img } from '@/lib/images';
+import { graph, personNode, webPageNode, breadcrumbNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const title = it ? 'Ricerca applicata in AI e ML' : 'Applied AI & ML research';
+const description = it
+  ? 'Il lato di ricerca del lavoro di Michelangelo Amoruso Manzari: computer vision per il riciclo della plastica in un progetto di ricerca europeo, laurea magistrale in AI/ML alla Sapienza e un metodo che porta i risultati in produzione.'
+  : 'The research side of Michelangelo Amoruso Manzari’s work: computer vision for plastic recycling in a European research project, an MSc in AI/ML at Sapienza and a method that carries results into production.';
+const principles = it
+  ? [
+      ['Baseline prima di tutto', 'Ogni modello deve battere una baseline semplice e onesta, misurata sugli stessi dati.'],
+      ['Validazione out-of-time', 'Si valida sul futuro, non su un campione casuale del passato: è così che il modello verrà usato.'],
+      ['Errori con un costo', 'Falsi positivi e falsi negativi non costano uguale. Le soglie si scelgono sul costo reale.'],
+      ['Spiegabilità', 'Gli esperti devono poter capire e contestare una previsione. Senza fiducia, nessuna adozione.'],
+      ['Riproducibilità', 'Esperimenti tracciati, dati versionati, risultati ripetibili.'],
+      ['Ponte verso la produzione', 'Un risultato di ricerca vale quando sopravvive a latenza, costi e dati reali.'],
+    ]
+  : [
+      ['Baselines first', 'Every model must beat a simple, honest baseline measured on the same data.'],
+      ['Out-of-time validation', 'Validate on the future, not on a random slice of the past: that is how the model will be used.'],
+      ['Errors have a cost', 'False positives and false negatives don’t cost the same. Thresholds are chosen on real costs.'],
+      ['Explainability', 'Experts must be able to understand and challenge a prediction. No trust, no adoption.'],
+      ['Reproducibility', 'Tracked experiments, versioned data, repeatable results.'],
+      ['Bridge to production', 'A research result counts when it survives latency, cost and real data.'],
+    ];
+const jsonld = graph(
+  personNode(lang),
+  webPageNode({ url: route('research', lang), name: title, description, lang, dateModified: LAST_UPDATED }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.research, url: route('research', lang) }]),
+);
+const lab = img('research-lab');
+const belt = img('case-recycling-topdown');
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader lang={lang} eyebrow={s.nav.research} title={it ? 'Il rigore di un laboratorio,' : 'The rigour of a lab,'} accent={it ? 'il ritmo di un prodotto.' : 'the pace of a product.'} lede={description} crumbs={[{ name: s.nav.research }]} image={lab} />
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x grid gap-14 pb-20 lg:grid-cols-2 lg:items-center">
+      <div>
+        <p class="eyebrow">{it ? 'Progetto di ricerca europeo' : 'European research project'}</p>
+        <h2 class="h2 mt-5">{it ? 'Computer vision per il riciclo della plastica.' : 'Computer vision for plastic recycling.'}</h2>
+        <p class="lede mt-6">{it ? 'In AlmavivA ho lavorato su algoritmi di computer vision per riconoscere e smistare i rifiuti plastici all’interno di un consorzio di ricerca europeo, tra metodo scientifico e vincoli di un impianto reale.' : 'At AlmavivA I worked on computer vision algorithms that recognise and sort plastic waste inside a European research consortium, balancing scientific method with the constraints of a real plant.'}</p>
+        <a href={caseUrl('plastic-cv', lang)} class="btn btn-ghost mt-8">{s.cta.readCase} <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      {belt && <Image src={belt} alt={it ? 'Oggetti di plastica su un nastro trasportatore visti dall’alto' : 'Plastic items on a conveyor belt seen from above'} widths={[640, 1024]} sizes="(min-width: 1024px) 45vw, 100vw" class="rounded-[1.6rem] border border-white/10" loading="lazy" />}
+    </div>
+  </section>
+
+  <section class="surface-light" data-surface="light">
+    <div class="container-x section-y">
+      <p class="eyebrow">{it ? 'Metodo' : 'Method'}</p>
+      <h2 class="h2 mt-5 max-w-3xl">{it ? 'Sei principi che applico a ogni progetto.' : 'Six principles I apply to every project.'}</h2>
+      <ol class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {principles.map(([k, d], i) => (
+          <li class="card !bg-white p-6">
+            <p class="mono text-xs text-[#9c3d07]">0{i + 1}</p>
+            <h3 class="mt-2 text-xl font-medium tracking-tight">{k}</h3>
+            <p class="mt-2 text-sm text-smoke">{d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x section-y">
+      <p class="eyebrow">{it ? 'Formazione' : 'Education'}</p>
+      <h2 class="h2 mt-5">{it ? 'Studio continuo, applicato.' : 'Continuous study, applied.'}</h2>
+      <ul class="mt-10 divide-y divide-white/10 border-y border-white/10">
+        {education.map((e) => (
+          <li class="grid gap-2 py-6 md:grid-cols-[12rem_1fr_auto] md:items-baseline md:gap-8">
+            <span class="mono text-xs text-ash">{e.period[lang]}</span>
+            <span><span class="block text-lg font-medium tracking-tight">{it ? e.orgIt : e.org}</span><span class="block text-sm text-ash">{e.title[lang]}</span></span>
+          </li>
+        ))}
+      </ul>
+      <a href={serviceUrl('research', lang)} class="btn btn-primary mt-10">{it ? 'Ricerca applicata per la tua azienda' : 'Applied research for your company'} <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </section>
+  <CTABand lang={lang} />
+</Base>

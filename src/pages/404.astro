@@ -1,0 +1,19 @@
+---
+import Base from '@/layouts/Base.astro';
+import { route } from '@/data/routes.mjs';
+---
+<Base title="404 · Page not found · Michelangelo Amoruso Manzari" description="This page does not exist. Pagina non trovata." lang="en" noindex>
+  <section class="surface-dark relative isolate grid min-h-[100svh] place-items-center overflow-hidden" data-surface="dark">
+    <div class="blob left-1/4 top-1/4 size-[30rem] bg-ember/30"></div>
+    <div class="blob right-1/4 bottom-1/4 size-[26rem] bg-violet/30 [animation-delay:-7s]"></div>
+    <div class="container-x text-center">
+      <p class="eyebrow justify-center">404 · anomaly detected</p>
+      <h1 class="display mt-6">This page is an <span class="serif-accent text-gradient">outlier.</span></h1>
+      <p class="lede mx-auto mt-6">The model couldn’t find it. Questa pagina non esiste.</p>
+      <div class="mt-10 flex flex-wrap justify-center gap-3">
+        <a href={route('home', 'en')} class="btn btn-ember">Back home →</a>
+        <a href={route('home', 'it')} class="btn btn-ghost">Torna alla home</a>
+      </div>
+    </div>
+  </section>
+</Base>

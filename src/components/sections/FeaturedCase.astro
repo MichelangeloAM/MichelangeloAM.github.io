@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import { homeCopy } from '@/data/home';
+import { caseUrl } from '@/data/routes.mjs';
+import { img } from '@/lib/images';
+import { t } from '@/i18n/ui';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).featured;
+const s = t(lang);
+const cover = img('case-claims');
+---
+
+<section class="surface-dark relative" data-surface="dark" id="featured">
+  <div class="container-x section-y">
+    <p class="eyebrow reveal">{c.eyebrow}</p>
+    <div class="mt-8 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+      <div class="reveal relative overflow-hidden rounded-[2rem] border border-white/10">
+        {cover ? (
+          <Image src={cover} alt={lang === 'it' ? 'Illustrazione: documenti e foto di un sinistro trasformati in dati strutturati e in una stima' : 'Illustration: claim documents and photos turned into structured data and an estimate'} widths={[640, 1024, 1440]} sizes="(min-width: 1024px) 55vw, 100vw" class="aspect-[4/3] h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div class="aspect-[4/3] bg-[radial-gradient(circle_at_60%_40%,rgb(255_122_26/0.35),transparent_60%)]"></div>
+        )}
+        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/70 to-transparent p-6 pt-24 md:p-8 md:pt-32">
+          <p class="mono text-xs text-ash">{c.client}</p>
+          <h2 class="mt-2 text-3xl font-medium leading-tight tracking-tight md:text-5xl">{c.title}</h2>
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <blockquote class="reveal serif-accent text-2xl leading-snug text-bone/90 md:text-3xl">“{c.quote}”</blockquote>
+        <p class="reveal mono mt-4 text-xs text-ash">— Michelangelo Amoruso Manzari</p>
+        <ol class="relative mt-10 grid gap-1" data-steps>
+          <span class="absolute bottom-3 left-[1.15rem] top-3 w-px bg-white/10" aria-hidden="true"><span class="block h-full w-full origin-top scale-y-0 bg-gradient-to-b from-ember to-violet" data-steps-line></span></span>
+          {c.steps.map((st) => (
+            <li class="step relative flex gap-5 rounded-2xl py-3 pr-3 transition-opacity" data-step>
+              <span class="mono relative z-10 grid size-[2.3rem] shrink-0 place-items-center rounded-full border border-white/15 bg-ink text-[0.72rem] text-ash transition-colors" data-step-n>{st.n}</span>
+              <span>
+                <span class="block text-lg font-medium tracking-tight">{st.t}</span>
+                <span class="block text-sm text-ash">{st.d}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+        <dl class="reveal mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10">
+          {c.meta.map((m) => (
+            <div class="bg-ink p-4"><dt class="mono text-[0.6rem] uppercase tracking-[0.12em] text-ash">{m.k}</dt><dd class="mt-1 text-sm font-medium">{m.v}</dd></div>
+          ))}
+        </dl>
+        <a href={caseUrl('groupama-claims', lang)} class="btn btn-primary reveal mt-8 self-start" data-magnetic>{s.cta.readCase} <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .step.is-active [data-step-n] { border-color: var(--color-ember); color: var(--color-ink); background: var(--color-ember); box-shadow: 0 0 24px rgb(255 122 26 / 0.5); }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, reducedMotion } from '@/scripts/motion';
+  const list = document.querySelector<HTMLElement>('[data-steps]');
+  if (list) {
+    const steps = [...list.querySelectorAll<HTMLElement>('[data-step]')];
+    if (reducedMotion()) steps.forEach((st) => st.classList.add('is-active'));
+    else {
+      ScrollTrigger.create({
+        trigger: list,
+        start: 'top 70%',
+        end: 'bottom 45%',
+        scrub: true,
+        onUpdate: (self) => {
+          const k = Math.min(steps.length - 1, Math.floor(self.progress * steps.length));
+          steps.forEach((st, i) => {
+            st.classList.toggle('is-active', i <= k);
+            st.style.opacity = i <= k ? '1' : '0.45';
+          });
+          gsap.set('[data-steps-line]', { scaleY: self.progress });
+        },
+      });
+    }
+  }
+</script>

@@ -1,0 +1,174 @@
+---
+import { homeCopy } from '@/data/home';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const a = homeCopy(lang).agent;
+const first = a.script[0];
+---
+
+<div
+  class="agent-card relative w-full overflow-hidden rounded-[1.6rem] border border-white/12 bg-[rgb(18_18_21/0.72)] text-bone shadow-[0_40px_120px_-40px_rgb(255_122_26/0.35)] backdrop-blur-2xl md:w-[25rem]"
+  data-agent
+  data-script={JSON.stringify(a.script)}
+  data-trace={JSON.stringify(a.trace)}
+>
+  <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
+    <p class="mono flex items-center gap-2 text-[0.72rem] text-ash">
+      <span class="size-1.5 animate-[var(--animate-pulse-soft)] rounded-full bg-ember shadow-[0_0_10px_var(--color-ember)]"></span>
+      {a.label}<span class="animate-[var(--animate-blink)] text-ember">_</span>
+    </p>
+    <div class="flex rounded-full bg-white/5 p-0.5" role="tablist" aria-label={a.label}>
+      {a.tabs.map((tab, i) => (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          class="mono rounded-full px-2.5 py-1 text-[0.68rem] text-ash transition-colors aria-selected:bg-white/10 aria-selected:text-bone"
+          data-agent-tab={i}
+        >{tab}</button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="h-[15.5rem] overflow-hidden px-4 py-4" data-agent-panel="0" role="tabpanel">
+    <div class="flex flex-col gap-3 text-[0.9rem] leading-relaxed" data-agent-log>
+      <p class="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-white/10 px-3.5 py-2.5" data-agent-q>{first.q}</p>
+      <div class="flex gap-2.5">
+        <span class="mt-1 grid size-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ember to-violet text-[0.5rem] font-semibold text-ink">MAM</span>
+        <p class="max-w-[90%] text-bone/90" data-agent-a>{first.a}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trace -->
+  <div class="hidden h-[15.5rem] overflow-hidden px-4 py-4" data-agent-panel="1" role="tabpanel">
+    <ol class="mono grid gap-1.5 text-[0.72rem] leading-relaxed text-ash" data-agent-trace>
+      {a.trace.map((line, i) => (
+        <li class="flex gap-2"><span class="text-ember/80">{String(i * 137).padStart(4, '0')}ms</span><span class="text-bone/80">{line}</span></li>
+      ))}
+    </ol>
+  </div>
+
+  <!-- Voice -->
+  <div class="hidden h-[15.5rem] flex-col items-center justify-center gap-5 px-6 py-4" data-agent-panel="2" role="tabpanel">
+    <div class="flex h-16 items-center gap-[3px]" aria-hidden="true">
+      {Array.from({ length: 36 }).map((_, i) => (
+        <span class="wave-bar w-[3px] rounded-full bg-gradient-to-t from-ember to-violet" style={`--i:${i}`}></span>
+      ))}
+    </div>
+    <p class="text-center text-sm text-bone/80" data-agent-voice>{first.a}</p>
+  </div>
+
+  <p class="mono border-t border-white/10 px-4 py-2.5 text-[0.65rem] text-ash/80">{a.disclaimer}</p>
+</div>
+
+<style>
+  .wave-bar {
+    height: 20%;
+    animation: wave 1.2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.07s);
+  }
+  @keyframes wave {
+    0%, 100% { height: 14%; opacity: 0.5; }
+    50% { height: 100%; opacity: 1; }
+  }
+  [data-agent-panel].is-visible { display: flex; }
+  [data-agent-panel="0"].is-visible, [data-agent-panel="1"].is-visible { display: block; }
+</style>
+
+<script>
+  import { reducedMotion } from '@/scripts/motion';
+
+  const root = document.querySelector<HTMLElement>('[data-agent]');
+  if (root) {
+    const script: { q: string; a: string }[] = JSON.parse(root.dataset.script ?? '[]');
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-agent-tab]')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-agent-panel]')];
+    const log = root.querySelector<HTMLElement>('[data-agent-log]')!;
+    const voice = root.querySelector<HTMLElement>('[data-agent-voice]')!;
+    const traceItems = [...root.querySelectorAll<HTMLElement>('[data-agent-trace] li')];
+    let paused = false;
+    let active = 0;
+
+    const show = (i: number) => {
+      active = i;
+      tabs.forEach((t, k) => t.setAttribute('aria-selected', String(k === i)));
+      panels.forEach((p, k) => {
+        p.classList.toggle('hidden', k !== i);
+        p.classList.toggle('is-visible', k === i);
+      });
+      if (i === 1) playTrace();
+    };
+    tabs.forEach((t, i) => t.addEventListener('click', () => show(i)));
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const waitWhilePaused = async () => { while (paused) await sleep(150); };
+    root.addEventListener('pointerenter', () => (paused = true));
+    root.addEventListener('pointerleave', () => (paused = false));
+
+    async function playTrace() {
+      traceItems.forEach((li) => (li.style.opacity = '0'));
+      for (const li of traceItems) {
+        await sleep(260);
+        li.style.transition = 'opacity .4s';
+        li.style.opacity = '1';
+      }
+    }
+
+    async function typeInto(el: HTMLElement, text: string, speed: number) {
+      el.textContent = '';
+      for (const ch of text) {
+        await waitWhilePaused();
+        el.textContent += ch;
+        await sleep(speed);
+      }
+    }
+
+    async function streamWords(el: HTMLElement, text: string) {
+      el.textContent = '';
+      const words = text.split(' ');
+      for (let w = 0; w < words.length; w++) {
+        await waitWhilePaused();
+        el.textContent += (w ? ' ' : '') + words[w];
+        voice.textContent = el.textContent;
+        await sleep(45 + Math.random() * 50);
+      }
+    }
+
+    async function loop() {
+      let i = 0;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const item = script[i % script.length];
+        log.innerHTML = '';
+        const q = document.createElement('p');
+        q.className = 'ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-white/10 px-3.5 py-2.5';
+        log.append(q);
+        await typeInto(q, item.q, 28);
+        await sleep(350);
+        const row = document.createElement('div');
+        row.className = 'flex gap-2.5';
+        row.innerHTML = '<span class="mt-1 grid size-6 shrink-0 place-items-center rounded-full bg-gradient-to-br from-ember to-violet text-[0.5rem] font-semibold text-ink">MAM</span><p class="max-w-[90%] text-bone/90"><span class="inline-flex gap-1 py-2"><i class="size-1.5 rounded-full bg-ash animate-bounce"></i><i class="size-1.5 rounded-full bg-ash animate-bounce [animation-delay:.1s]"></i><i class="size-1.5 rounded-full bg-ash animate-bounce [animation-delay:.2s]"></i></span></p>';
+        log.append(row);
+        await sleep(900);
+        await streamWords(row.querySelector('p')!, item.a);
+        if (active === 1) playTrace();
+        await sleep(3800);
+        i++;
+      }
+    }
+
+    if (!reducedMotion()) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          io.disconnect();
+          setTimeout(loop, 1600);
+        }
+      });
+      io.observe(root);
+    }
+  }
+</script>

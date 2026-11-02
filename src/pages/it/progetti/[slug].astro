@@ -1,0 +1,11 @@
+---
+import Page from '@/components/pages/CaseDetail.astro';
+import { cases } from '@/data/cases';
+import { CASE_SLUGS } from '@/data/routes.mjs';
+
+export function getStaticPaths() {
+  return cases.map((item) => ({ params: { slug: CASE_SLUGS[item.key].it }, props: { item } }));
+}
+const { item } = Astro.props;
+---
+<Page lang="it" c={item} />

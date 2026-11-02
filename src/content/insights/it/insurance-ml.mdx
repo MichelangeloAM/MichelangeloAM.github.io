@@ -1,0 +1,45 @@
+---
+key: insurance-ml
+lang: it
+title: "Machine learning per i sinistri assicurativi: cosa funziona davvero"
+description: Dove il machine learning crea valore nella gestione dei sinistri (stima dei costi, estrazione dei documenti, rilevamento frodi) e come portarlo in produzione in modo che i liquidatori se ne fidino.
+date: 2026-11-02
+cover: case-claims
+draft: true
+tags: [ML assicurativo, Sinistri, Antifrode]
+---
+
+**In breve:** nei sinistri il machine learning funziona meglio come prima opinione affidabile: una stima del costo, un insieme di campi estratti, uno score di rischio frode. Velocizza i liquidatori senza togliere loro la decisione. Le parti difficili sono dati, validazione e fiducia, non l’algoritmo.
+
+## Dove il ML crea valore nei sinistri
+
+- **Stima di costo e severità.** Modelli di gradient boosting addestrati sullo storico possono stimare il costo probabile di un nuovo sinistro a partire da danno, veicolo, polizza e contesto.
+- **Comprensione dei documenti.** LLM e document AI trasformano moduli, perizie e corrispondenza in campi strutturati, così nessuno deve ricopiarli.
+- **Rilevamento di frodi e anomalie.** I modelli ordinano i sinistri per rischio, così gli ispettori guardano prima i casi più sospetti.
+- **Triage e smistamento.** I sinistri semplici vengono separati da quelli complessi.
+
+## Cosa lo fa funzionare nella pratica
+
+### Parti dalla decisione
+
+Definisci esattamente quale decisione supporta il modello e quanto costa un errore. Sovrastimare o sottostimare una riserva ha conseguenze diverse; modello e soglie devono rifletterlo.
+
+### Valida sul futuro
+
+I dati dei sinistri cambiano nel tempo: prezzi, pratiche di riparazione e schemi di frode evolvono. Valida i modelli su periodi successivi a quelli di training e monitora il drift dopo il rilascio.
+
+### Spiega ogni previsione
+
+I liquidatori adottano un modello quando vedono perché suggerisce una cifra. Spiegazioni per singolo sinistro dei principali fattori di costo trasformano una scatola nera in una seconda opinione che si può contestare.
+
+### Chiudi il ciclo
+
+Ogni correzione di un liquidatore è un nuovo dato di training. Raccoglila, e il modello migliora con l’uso.
+
+## Cosa ho imparato coordinando un programma tra più aziende
+
+Nei grandi programmi la proprietà dei dati è distribuita tra aziende e reparti. Un dizionario dati condiviso, responsabili chiari per ogni fonte e demo regolari agli stakeholder di business contano quanto l’accuratezza del modello.
+
+## Da dove iniziare
+
+Se sei una compagnia o una società di gestione sinistri, la strada più rapida è di solito un pilota mirato su una tipologia di sinistro con un KPI chiaro, come il tempo di stima o la coerenza delle stime. Vedi come lo affronto nel [caso studio sui sinistri](/it/progetti/machine-learning-sinistri-assicurativi/).

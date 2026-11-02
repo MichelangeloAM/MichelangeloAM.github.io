@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route, insightUrl } from '@/data/routes.mjs';
+import { t, formatDate } from '@/i18n/ui';
+import { img } from '@/lib/images';
+import { graph, personNode, webPageNode, breadcrumbNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const posts = (await getCollection('insights', (p) => p.data.lang === lang && !p.data.draft)).sort((a, b) => +b.data.date - +a.data.date);
+const title = it ? 'Approfondimenti su AI e machine learning' : 'AI & machine learning insights';
+const description = it
+  ? 'Articoli pratici di Michelangelo Amoruso Manzari su agenti AI, machine learning per le assicurazioni, forecasting e su come trasformare i dati aziendali in risultati.'
+  : 'Practical articles by Michelangelo Amoruso Manzari on AI agents, machine learning for insurance, forecasting and turning company data into results.';
+const jsonld = graph(
+  personNode(lang),
+  webPageNode({ url: route('insights', lang), name: title, description, lang, type: 'CollectionPage', dateModified: LAST_UPDATED }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.insights, url: route('insights', lang) }]),
+);
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader lang={lang} eyebrow={s.nav.insights} title={it ? 'Note dal campo:' : 'Notes from the field:'} accent={it ? 'dati, modelli, risultati.' : 'data, models, results.'} lede={description} crumbs={[{ name: s.nav.insights }]} image={img('research-lab')} />
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x pb-28">
+      {posts.length === 0 ? (
+        <div class="card max-w-2xl p-8">
+          <p class="eyebrow">{it ? 'In arrivo' : 'Coming soon'}</p>
+          <p class="mt-4 text-lg text-bone/90">{it ? 'I primi articoli sono in revisione. Nel frattempo, guarda i casi d’uso AI o scrivimi una domanda: le migliori diventano articoli.' : 'The first articles are in review. Meanwhile, browse the AI use cases or send me a question: the best ones become articles.'}</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href={route('useCases', lang)} class="btn btn-primary">{s.nav.useCases} →</a>
+            <a href={route('contact', lang)} class="btn btn-ghost">{s.nav.contact}</a>
+          </div>
+        </div>
+      ) : (
+        <ul class="grid gap-5 md:grid-cols-2">
+          {posts.map((p) => {
+            const cover = img(p.data.cover);
+            return (
+              <li>
+                <a href={insightUrl(p.data.key, lang)} class="card spotlight group block">
+                  {cover && <Image src={cover} alt="" widths={[600, 900]} sizes="(min-width: 768px) 45vw, 100vw" class="aspect-[2/1] w-full object-cover" loading="lazy" />}
+                  <div class="p-6">
+                    <p class="mono text-[0.68rem] text-ash">{formatDate(p.data.date.toISOString(), lang)}</p>
+                    <h2 class="mt-2 text-2xl font-medium tracking-tight">{p.data.title}</h2>
+                    <p class="mt-2 text-sm text-ash">{p.data.description}</p>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  </section>
+  <CTABand lang={lang} />
+</Base>

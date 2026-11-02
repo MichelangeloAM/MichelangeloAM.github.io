@@ -1,0 +1,122 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import FAQ from '@/components/sections/FAQ.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { services, type Service } from '@/data/services';
+import { caseByKey } from '@/data/cases';
+import { useCases } from '@/data/use-cases';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route } from '@/data/routes.mjs';
+import { t } from '@/i18n/ui';
+import { glyph, img } from '@/lib/images';
+import { graph, personNode, serviceNode, webPageNode, breadcrumbNode, faqNode } from '@/lib/schema';
+
+interface Props { lang: Lang; sv: Service }
+const { lang, sv } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const L = it
+  ? { who: 'È per te se', get: 'Cosa ricevi', how: 'Come funziona', kpi: 'KPI che muove', proof: 'L’ho già fatto', timeline: 'Tempi tipici', other: 'Altri servizi' }
+  : { who: 'This is for you if', get: 'What you get', how: 'How it works', kpi: 'KPIs it moves', proof: 'Where I’ve done it', timeline: 'Typical timeline', other: 'Other services' };
+const title = `${sv.name[lang]} · Amoruso Manzari`;
+const description = `${sv.summary[lang]} ${it ? 'Michelangelo Amoruso Manzari, Senior AI & ML Engineer a Roma.' : 'By Michelangelo Amoruso Manzari, Senior AI & ML Engineer in Rome.'}`;
+const ogImage = `/og/${lang}/services/${sv.key}.jpg`;
+const related = sv.cases.map((k) => caseByKey(k));
+const coverKey = related[0]?.cover;
+const jsonld = graph(
+  personNode(lang),
+  serviceNode({ name: sv.name[lang], description: sv.summary[lang], url: sv.url(lang), serviceType: sv.serviceType, lang }),
+  webPageNode({ url: sv.url(lang), name: sv.name[lang], description, lang, dateModified: LAST_UPDATED }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.services, url: route('services', lang) }, { name: sv.name[lang], url: sv.url(lang) }]),
+  faqNode(sv.faqs[lang]),
+);
+const others = services.filter((x) => x.key !== sv.key);
+const relatedUseCases = useCases.filter((u) => u.proof && sv.cases.includes(u.proof)).slice(0, 3);
+---
+
+<Base title={title} description={description} lang={lang} jsonld={jsonld} ogImage={ogImage}>
+  <PageHeader lang={lang} eyebrow={`${s.nav.services} · ${sv.timeline[lang]}`} title={sv.name[lang]} lede={sv.summary[lang]} crumbs={[{ name: s.nav.services, url: route('services', lang) }, { name: sv.name[lang] }]} image={coverKey ? img(coverKey) : undefined}>
+    <div class="mt-9 flex flex-wrap gap-3">
+      <a href={route('contact', lang)} class="btn btn-ember" data-magnetic>{s.cta.book} <span class="arrow" aria-hidden="true">→</span></a>
+      <a href={`mailto:${profile.email}`} class="btn btn-ghost">{s.cta.email}</a>
+    </div>
+  </PageHeader>
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x grid gap-12 pb-20 lg:grid-cols-[1fr_22rem] lg:gap-20">
+      <div class="min-w-0">
+        <p class="text-xl leading-relaxed tracking-tight text-bone/90 md:text-2xl">{sv.intro[lang]}</p>
+
+        <h2 class="h3 mt-16">{L.who}</h2>
+        <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+          {sv.problems[lang].map((p) => <li class="card p-5 text-sm leading-relaxed text-bone/85">{p}</li>)}
+        </ul>
+
+        <h2 class="h3 mt-16">{L.how}</h2>
+        <ol class="mt-6 grid gap-3 sm:grid-cols-2">
+          {sv.steps[lang].map((st, i) => (
+            <li class="card p-6">
+              <p class="mono text-xs text-ember">0{i + 1}</p>
+              <p class="mt-2 text-lg font-medium tracking-tight">{st.t}</p>
+              <p class="mt-1.5 text-sm text-ash">{st.d}</p>
+            </li>
+          ))}
+        </ol>
+
+        <h2 class="h3 mt-16">{L.get}</h2>
+        <ul class="prose-x mt-5">{sv.deliverables[lang].map((d) => <li>{d}</li>)}</ul>
+
+        {related.length > 0 && (
+          <>
+            <h2 class="h3 mt-16">{L.proof}</h2>
+            <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+              {related.map((c) => {
+                const cover = img(c.cover);
+                return (
+                  <li>
+                    <a href={c.url(lang)} class="card spotlight group block">
+                      {cover && <Image src={cover} alt="" widths={[480, 720]} sizes="(min-width: 640px) 30vw, 100vw" class="aspect-[3/2] w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />}
+                      <span class="block p-5"><span class="mono block text-[0.65rem] text-ash">{c.client}</span><span class="mt-1 block font-medium leading-snug">{c.title[lang]}</span></span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
+
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+        <div class="card p-6">
+          {glyph(sv.glyph) && <Image src={glyph(sv.glyph)!} alt="" width={160} height={160} class="size-20 rounded-2xl object-cover" />}
+          <dl class="mt-6 grid gap-5">
+            <div><dt class="mono text-[0.62rem] uppercase tracking-[0.12em] text-ash">{L.timeline}</dt><dd class="mt-1 text-lg font-medium">{sv.timeline[lang]}</dd></div>
+            <div><dt class="mono text-[0.62rem] uppercase tracking-[0.12em] text-ash">{L.kpi}</dt><dd class="mt-2 grid gap-1.5">{sv.kpis[lang].map((k) => <span class="text-sm text-ember-2">↗ {k}</span>)}</dd></div>
+            <div><dt class="mono text-[0.62rem] uppercase tracking-[0.12em] text-ash">{s.labels.stack}</dt><dd class="mt-2 flex flex-wrap gap-1.5">{sv.stack.map((x) => <span class="chip">{x}</span>)}</dd></div>
+          </dl>
+          <a href={route('contact', lang)} class="btn btn-primary mt-7 w-full">{s.cta.book}</a>
+        </div>
+        {relatedUseCases.length > 0 && (
+          <div class="mt-5">
+            <p class="eyebrow">{s.nav.useCases}</p>
+            <ul class="mt-4 grid gap-2 text-sm">
+              {relatedUseCases.map((u) => <li class="card p-4"><span class="font-medium">{u.title[lang]}</span><span class="mt-1 block text-xs text-ash">{u.kpi[lang]}</span></li>)}
+            </ul>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    <div class="container-x border-t border-white/10 py-14">
+      <p class="eyebrow">{L.other}</p>
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {others.map((o) => <li><a href={o.url(lang)} class="chip !px-4 !py-2 !text-[0.8rem] hover:!text-bone">{o.name[lang]}</a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <FAQ eyebrow={s.labels.faq} title={sv.name[lang]} items={sv.faqs[lang]} />
+  <CTABand lang={lang} />
+</Base>

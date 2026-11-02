@@ -1,0 +1,45 @@
+---
+key: insurance-ml
+lang: en
+title: "Machine learning for insurance claims: what actually works"
+description: Where machine learning creates value in insurance claims handling (cost prediction, document extraction and fraud detection) and how to deploy it so adjusters trust it.
+date: 2026-11-02
+cover: case-claims
+draft: true
+tags: [Insurance ML, Claims, Fraud detection]
+---
+
+**Short answer:** in claims, machine learning works best as a reliable first opinion: a cost estimate, a set of extracted fields, a fraud-risk score. It speeds up adjusters without taking the decision away from them. The hard parts are data, validation and trust, not the algorithm.
+
+## Where ML creates value in claims
+
+- **Cost and severity prediction.** Gradient-boosting models trained on historical claims can estimate the likely cost of a new claim from damage, vehicle, policy and context features.
+- **Document understanding.** LLMs and document AI turn forms, reports and correspondence into structured fields, so nobody has to re-type them.
+- **Fraud and anomaly detection.** Models rank claims by risk, so investigators look at the most suspicious cases first.
+- **Triage and routing.** Simple, fast-track claims get separated from complex ones.
+
+## What makes it work in practice
+
+### Start from the decision
+
+Define exactly which decision the model supports and what an error costs. Overestimating a reserve and underestimating it have different consequences; the model and its thresholds should reflect that.
+
+### Validate on the future
+
+Claims data shifts over time: prices, repair practices and fraud patterns change. Validate models on later periods than the ones used for training, and monitor drift once deployed.
+
+### Explain every prediction
+
+Adjusters adopt a model when they can see why it suggests a figure. Per-claim explanations of the main cost drivers turn a black box into a second opinion they can challenge.
+
+### Close the loop
+
+Every correction an adjuster makes is new training data. Capture it, and the model improves with use.
+
+## Lessons from coordinating a multi-company programme
+
+On large programmes, data ownership is spread across companies and departments. A shared data dictionary, clear owners for each source and regular demos to business stakeholders matter as much as model accuracy.
+
+## Where to start
+
+If you are an insurer or a claims-management company, the fastest path is usually a focused pilot on one claim type with a clear KPI, such as estimate time or estimate consistency. See how I approach it in the [insurance claims case study](/work/insurance-claims-machine-learning/).

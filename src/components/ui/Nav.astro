@@ -1,0 +1,97 @@
+---
+import { t } from '@/i18n/ui';
+import { route, alternatesFor } from '@/data/routes.mjs';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const path = Astro.url.pathname;
+const alt = alternatesFor(path);
+const otherLang: Lang = lang === 'en' ? 'it' : 'en';
+const switchHref = alt ? alt[otherLang] : route('home', otherLang);
+
+const links = [
+  { href: route('work', lang), label: s.nav.work },
+  { href: route('services', lang), label: s.nav.services },
+  { href: route('useCases', lang), label: s.nav.useCases },
+  { href: route('research', lang), label: s.nav.research },
+  { href: route('about', lang), label: s.nav.about },
+];
+const isActive = (href: string) => path.startsWith(href);
+---
+
+<header class="fixed inset-x-0 top-0 z-50" data-nav>
+  <div class="container-x pt-3 md:pt-4">
+    <nav
+      aria-label="Primary"
+      class="nav-shell relative flex h-14 items-center justify-between gap-4 rounded-full border border-white/10 bg-[rgb(10_10_11/0.55)] pl-4 pr-2 text-bone backdrop-blur-xl backdrop-saturate-150 transition-[background-color,border-color,transform] duration-500"
+    >
+      <a href={route('home', lang)} class="group flex items-center gap-2.5">
+        <span aria-hidden="true" class="relative grid size-8 place-items-center rounded-full bg-gradient-to-br from-ember to-violet text-[0.62rem] font-semibold tracking-tight text-ink">
+          MAM
+          <span class="absolute inset-0 rounded-full ring-1 ring-white/30"></span>
+        </span>
+        <span class="text-sm font-medium tracking-tight"><span class="sr-only sm:not-sr-only">Michelangelo <span class="text-ash">Amoruso Manzari</span></span></span>
+      </a>
+
+      <ul class="hidden items-center gap-1 lg:flex">
+        {links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class:list={['rounded-full px-3.5 py-2 text-sm transition-colors hover:text-bone', isActive(l.href) ? 'bg-white/10 text-bone' : 'text-ash']}
+              aria-current={isActive(l.href) ? 'page' : undefined}
+            >{l.label}</a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="flex items-center gap-1.5">
+        <a href={switchHref} hreflang={otherLang} lang={otherLang} class="mono rounded-full px-3 py-2 text-xs text-ash transition-colors hover:text-bone" aria-label={`${s.langSwitchShort} · ${s.langSwitch}`}>
+          {s.langSwitchShort}
+        </a>
+        <a href={route('contact', lang)} class="btn btn-ember magnetic !h-10 !px-4 text-sm" data-magnetic>
+          {s.cta.book}
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+        <button type="button" class="grid size-10 place-items-center rounded-full text-bone lg:hidden" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+          <span class="sr-only">{s.menu}</span>
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 6h14M2 12h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+    </nav>
+
+    <div id="mobile-menu" class="mt-2 hidden rounded-3xl border border-white/10 bg-[rgb(10_10_11/0.92)] p-3 text-bone backdrop-blur-xl lg:hidden" data-menu>
+      <ul class="grid gap-1">
+        {[...links, { href: route('insights', lang), label: s.nav.insights }, { href: route('contact', lang), label: s.nav.contact }].map((l) => (
+          <li><a href={l.href} class="block rounded-2xl px-4 py-3 text-lg tracking-tight hover:bg-white/5">{l.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    menu?.classList.toggle('hidden', open);
+  });
+  // Hide on scroll down, show on scroll up.
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  let lastY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (!nav) return;
+    const hide = y > 240 && y > lastY && toggle?.getAttribute('aria-expanded') !== 'true';
+    nav.style.transform = hide ? 'translateY(-120%)' : '';
+    lastY = y;
+  }, { passive: true });
+</script>
+
+<style>
+  [data-nav] { transition: transform 0.6s var(--ease-out-expo); }
+</style>

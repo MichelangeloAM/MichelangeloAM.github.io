@@ -1,0 +1,117 @@
+---
+import { Image } from 'astro:assets';
+import { homeCopy } from '@/data/home';
+import { dataTypes, industries, useCases } from '@/data/use-cases';
+import { caseUrl, route } from '@/data/routes.mjs';
+import { dataTile } from '@/lib/images';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).finder;
+const payload = useCases.map((u) => ({
+  id: u.id,
+  data: u.data,
+  industries: u.industries,
+  title: u.title[lang],
+  problem: u.problem[lang],
+  model: u.model[lang],
+  kpi: u.kpi[lang],
+  weeks: u.weeks,
+  proof: u.proof ? caseUrl(u.proof as any, lang) : null,
+}));
+const tileOrder: Record<string, number> = { emails: 0, documents: 1, images: 2, transactions: 3, timeseries: 4, crm: 5 };
+---
+
+<section class="surface-light relative" data-surface="light" id="finder">
+  <div class="container-x section-y !pt-8">
+    <div class="surface-dark overflow-hidden rounded-[2rem] p-6 md:p-12" data-finder data-cases={JSON.stringify(payload)} data-labels={JSON.stringify(c)}>
+      <div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p class="eyebrow">{c.eyebrow}</p>
+          <h2 class="h2 mt-5 max-w-2xl">{c.title}</h2>
+        </div>
+        <p class="lede md:max-w-sm md:text-base">{c.sub}</p>
+      </div>
+
+      <fieldset class="mt-10">
+        <legend class="mono text-[0.7rem] uppercase tracking-[0.12em] text-ash">{c.industry}</legend>
+        <div class="mt-3 flex flex-wrap gap-2">
+          {industries.map((ind, i) => (
+            <label class="finder-pill">
+              <input type="radio" name="finder-industry" value={ind.key} checked={i === 0} class="sr-only" />
+              <span>{ind.label[lang]}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="mt-6">
+        <legend class="mono text-[0.7rem] uppercase tracking-[0.12em] text-ash">{c.data}</legend>
+        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {dataTypes.map((d, i) => {
+            const t = dataTile(tileOrder[d.key]);
+            return (
+              <label class="finder-tile">
+                <input type="radio" name="finder-data" value={d.key} checked={i === 1} class="sr-only" />
+                <span class="flex items-center gap-3">
+                  {t ? <Image src={t} alt="" width={80} height={80} class="size-10 shrink-0 rounded-lg object-cover" loading="lazy" /> : <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-white/5 text-ember">◆</span>}
+                  <span class="min-w-0"><span class="block text-sm font-medium leading-tight">{d.label[lang]}</span><span class="mono block truncate text-[0.6rem] text-ash">{d.hint[lang]}</span></span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <div class="mt-8 grid gap-3 md:grid-cols-2" data-finder-results aria-live="polite"></div>
+
+      <a href={route('useCases', lang)} class="btn btn-ghost mt-8">{c.all} <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .finder-pill span { display: inline-flex; padding: 0.55rem 0.95rem; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.12); font-size: 0.85rem; color: var(--color-ash); cursor: pointer; transition: all 0.25s; }
+  .finder-pill:hover span { color: var(--color-bone); }
+  .finder-pill input:checked + span { background: var(--color-bone); color: var(--color-ink); border-color: var(--color-bone); }
+  .finder-pill input:focus-visible + span, .finder-tile input:focus-visible + span { outline: 2px solid var(--color-ember); outline-offset: 2px; }
+  .finder-tile > span { display: block; padding: 0.6rem; border-radius: 1rem; border: 1px solid rgb(255 255 255 / 0.1); background: rgb(255 255 255 / 0.03); cursor: pointer; transition: all 0.25s; }
+  .finder-tile:hover > span { border-color: rgb(255 255 255 / 0.25); }
+  .finder-tile input:checked + span { border-color: var(--color-ember); background: rgb(255 122 26 / 0.1); box-shadow: 0 0 0 1px var(--color-ember) inset; }
+</style>
+
+<script>
+  import { gsap, reducedMotion } from '@/scripts/motion';
+  const root = document.querySelector<HTMLElement>('[data-finder]');
+  if (root) {
+    type UC = { id: string; data: string; industries: string[]; title: string; problem: string; model: string; kpi: string; weeks: string; proof: string | null };
+    const cases: UC[] = JSON.parse(root.dataset.cases ?? '[]');
+    const L = JSON.parse(root.dataset.labels ?? '{}');
+    const out = root.querySelector<HTMLElement>('[data-finder-results]')!;
+    const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]!));
+    const render = () => {
+      const ind = (root.querySelector('input[name="finder-industry"]:checked') as HTMLInputElement)?.value;
+      const dt = (root.querySelector('input[name="finder-data"]:checked') as HTMLInputElement)?.value;
+      const hits = cases.filter((c) => c.data === dt && c.industries.includes(ind));
+      out.innerHTML = hits.length
+        ? hits.map((h) => `
+          <article class="finder-card rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-lg font-medium tracking-tight">${esc(h.title)}</h3>
+              ${h.proof ? `<a href="${h.proof}" class="mono shrink-0 rounded-full bg-mint/15 px-2 py-1 text-[0.62rem] text-mint">✓ ${esc(L.proof)}</a>` : ''}
+            </div>
+            <p class="mt-2 text-sm text-ash">${esc(h.problem)}</p>
+            <dl class="mt-4 grid gap-2 text-sm">
+              <div class="flex gap-3"><dt class="mono w-28 shrink-0 text-[0.66rem] uppercase tracking-[0.1em] text-ash">${esc(L.model)}</dt><dd>${esc(h.model)}</dd></div>
+              <div class="flex gap-3"><dt class="mono w-28 shrink-0 text-[0.66rem] uppercase tracking-[0.1em] text-ash">${esc(L.kpi)}</dt><dd class="text-ember-2">${esc(h.kpi)}</dd></div>
+              <div class="flex gap-3"><dt class="mono w-28 shrink-0 text-[0.66rem] uppercase tracking-[0.1em] text-ash">${esc(L.weeks)}</dt><dd>${esc(h.weeks)} ${esc(L.weeksUnit)}</dd></div>
+            </dl>
+          </article>`).join('')
+        : `<p class="rounded-2xl border border-dashed border-white/15 p-6 text-ash md:col-span-2">${esc(L.empty)}</p>`;
+      if (!reducedMotion()) gsap.from(out.children, { opacity: 0, y: 16, stagger: 0.06, duration: 0.6, ease: 'expo.out' });
+    };
+    root.addEventListener('change', render);
+    render();
+  }
+</script>

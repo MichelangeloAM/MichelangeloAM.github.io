@@ -1,0 +1,139 @@
+---
+import { homeCopy } from '@/data/home';
+import { serviceUrl } from '@/data/routes.mjs';
+import CapabilityMock from '@/components/mocks/CapabilityMock.astro';
+import { t } from '@/i18n/ui';
+import { Image } from 'astro:assets';
+import { glyph } from '@/lib/images';
+const glyphIndex: Record<string, number> = { agents: 1, llm: 2, ml: 3, forecasting: 4, vision: 5, research: 6 };
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).capabilities;
+const s = t(lang);
+const note = lang === 'it' ? 'Interfacce dimostrative con valori illustrativi.' : 'Demonstration interfaces with illustrative values.';
+---
+
+<section class="surface-light relative" data-surface="light" id="capabilities">
+  <div class="container-x pt-10 md:pt-16">
+    <p class="eyebrow reveal">{c.eyebrow}</p>
+    <h2 class="h2 reveal mt-5 max-w-3xl">{c.title}</h2>
+  </div>
+
+  <!-- Desktop: sticky tabbed scroll -->
+  <div class="relative hidden md:block" style={`height:${c.items.length * 75}vh`} data-cap-wrap>
+    <div class="sticky top-0 flex h-[100svh] items-center">
+      <div class="container-x grid w-full grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] items-center gap-14">
+        <div>
+        <ol class="grid gap-1" data-cap-tabs>
+          {c.items.map((item, i) => (
+            <li>
+              <button type="button" class="cap-tab group w-full rounded-2xl px-5 py-4 text-left transition-colors" data-cap-tab={i} aria-current={i === 0 ? 'true' : 'false'}>
+                <span class="flex items-center gap-4">
+                  <span class="mono w-5 text-xs text-smoke">0{i + 1}</span>
+                  {glyph(glyphIndex[item.key]) && <Image src={glyph(glyphIndex[item.key])!} alt="" width={72} height={72} class="cap-glyph size-9 rounded-xl object-cover" loading="lazy" />}
+                  <span class="text-xl font-medium tracking-tight">{item.name}</span>
+                </span>
+                <span class="cap-body grid grid-rows-[0fr] transition-[grid-template-rows] duration-500">
+                  <span class="overflow-hidden">
+                    <span class="block pl-[4.75rem] pt-2 text-[0.95rem] leading-relaxed text-smoke">{item.desc}</span>
+                    <span class="mono block pl-[4.75rem] pt-2 text-[0.72rem] text-[#9c3d07]">✓ {item.proof}</span>
+                  </span>
+                </span>
+                <span class="mt-3 ml-[4.75rem] block h-px overflow-hidden bg-black/10"><span class="cap-progress block h-full origin-left scale-x-0 bg-ember"></span></span>
+              </button>
+            </li>
+          ))}
+        </ol>
+        <p class="mono mt-5 pl-5 text-[0.62rem] text-smoke">{note}</p>
+        </div>
+        <div class="relative aspect-[5/4] w-full">
+          <div class="blob -right-10 -top-10 size-80 bg-violet/40"></div>
+          <div class="blob -bottom-10 left-0 size-72 bg-ember/35 [animation-delay:-6s]"></div>
+          <div class="blob right-1/4 top-1/3 size-60 bg-blush/40 [animation-delay:-12s]"></div>
+          {c.items.map((item, i) => (
+            <div class:list={['cap-mock absolute inset-x-0 top-1/2 -translate-y-1/2', i !== 0 && 'opacity-0']} data-cap-mock={i} aria-hidden={i !== 0 ? 'true' : undefined}>
+              <CapabilityMock kind={item.key} lang={lang} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile: stacked cards -->
+  <div class="container-x grid gap-10 pb-24 pt-12 md:hidden">
+    {c.items.map((item, i) => (
+      <article class="reveal min-w-0">
+        <p class="mono text-xs text-smoke">0{i + 1}</p>
+        <h3 class="h3 mt-2">{item.name}</h3>
+        <p class="mt-2 text-smoke">{item.desc}</p>
+        <p class="mono mt-2 text-[0.72rem] text-[#9c3d07]">✓ {item.proof}</p>
+        <div class="mt-5"><CapabilityMock kind={item.key} lang={lang} /></div>
+        <a href={serviceUrl(item.key as any, lang)} class="mt-4 inline-block text-sm underline decoration-ember underline-offset-4">{s.cta.learnMore} →</a>
+      </article>
+    ))}
+    <p class="mono text-[0.62rem] text-smoke">{note}</p>
+  </div>
+</section>
+
+<style>
+  .cap-tab[aria-current='true'] { background: rgb(255 255 255 / 0.7); box-shadow: 0 10px 30px -18px rgb(10 10 11 / 0.35); }
+  .cap-tab[aria-current='true'] .cap-body { grid-template-rows: 1fr; }
+  .cap-tab:not([aria-current='true']) .cap-glyph { opacity: 0.55; filter: grayscale(0.6); }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, reducedMotion } from '@/scripts/motion';
+
+  const wrap = document.querySelector<HTMLElement>('[data-cap-wrap]');
+  if (wrap && window.matchMedia('(min-width: 768px)').matches) {
+    const tabs = [...wrap.querySelectorAll<HTMLButtonElement>('[data-cap-tab]')];
+    const mocks = [...wrap.querySelectorAll<HTMLElement>('[data-cap-mock]')];
+    const bars = tabs.map((tb) => tb.querySelector<HTMLElement>('.cap-progress')!);
+    const n = tabs.length;
+    let current = 0;
+
+    const activate = (i: number) => {
+      if (i === current) return;
+      const prev = current;
+      current = i;
+      tabs.forEach((tb, k) => tb.setAttribute('aria-current', String(k === i)));
+      mocks.forEach((m, k) => m.setAttribute('aria-hidden', String(k !== i)));
+      if (reducedMotion()) {
+        mocks.forEach((m, k) => (m.style.opacity = k === i ? '1' : '0'));
+        return;
+      }
+      const dir = i > prev ? 1 : -1;
+      // Kill any in-flight tweens so fast scrolling can never leave two mocks visible.
+      mocks.forEach((m, k) => {
+        gsap.killTweensOf(m);
+        if (k !== i && k !== prev) gsap.set(m, { opacity: 0, y: 0, scale: 1 });
+      });
+      gsap.to(mocks[prev], { opacity: 0, y: -30 * dir, scale: 0.97, duration: 0.35, ease: 'power2.in' });
+      gsap.fromTo(mocks[i], { opacity: 0, y: 40 * dir, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'expo.out', delay: 0.05 });
+      const rows = mocks[i].querySelectorAll('.mock-row, .mock-box');
+      if (rows.length) gsap.fromTo(rows, { opacity: 0, y: 12 }, { opacity: 1, y: 0, stagger: 0.06, duration: 0.5, ease: 'power2.out', delay: 0.15, overwrite: true });
+      const barsIn = mocks[i].querySelectorAll<HTMLElement>('.mock-bar');
+      if (barsIn.length) gsap.fromTo(barsIn, { width: '0%' }, { width: (_k: number, el: HTMLElement) => el.style.getPropertyValue('--w'), stagger: 0.05, duration: 0.8, ease: 'expo.out', delay: 0.2, overwrite: true });
+    };
+
+    const st = ScrollTrigger.create({
+      trigger: wrap,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        const p = self.progress * n;
+        activate(Math.min(n - 1, Math.floor(p)));
+        bars.forEach((b, k) => (b.style.transform = `scaleX(${Math.max(0, Math.min(1, p - k))})`));
+      },
+    });
+
+    tabs.forEach((tb, i) => tb.addEventListener('click', () => {
+      const y = st.start + ((st.end - st.start) * (i + 0.15)) / n;
+      const lenis = (window as any).__lenis;
+      lenis ? lenis.scrollTo(y) : window.scrollTo({ top: y, behavior: 'smooth' });
+    }));
+  }
+</script>

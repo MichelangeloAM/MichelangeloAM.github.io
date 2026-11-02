@@ -1,0 +1,49 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { profile, type Lang } from '@/data/profile';
+import { route, insightUrl } from '@/data/routes.mjs';
+import { t, formatDate } from '@/i18n/ui';
+import { img } from '@/lib/images';
+import { graph, personNode, articleNode, breadcrumbNode } from '@/lib/schema';
+
+interface Props { lang: Lang; post: CollectionEntry<'insights'> }
+const { lang, post } = Astro.props;
+const s = t(lang);
+const { Content } = await render(post);
+const url = insightUrl(post.data.key, lang);
+const cover = img(post.data.cover);
+const published = post.data.date.toISOString();
+const modified = (post.data.updated ?? post.data.date).toISOString();
+const words = (post.body ?? '').split(/\s+/).length;
+const minutes = Math.max(1, Math.round(words / 220));
+const jsonld = graph(
+  personNode(lang),
+  articleNode({ headline: post.data.title, description: post.data.description, url, image: `/og/${lang}/insights/${post.data.key}.jpg`, lang, datePublished: published, dateModified: modified }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.insights, url: route('insights', lang) }, { name: post.data.title, url }]),
+);
+---
+
+<Base title={post.data.title.length > 46 ? post.data.title : `${post.data.title} · Amoruso Manzari`} description={post.data.description} lang={lang} jsonld={jsonld} type="article" published={published} modified={modified} noindex={post.data.draft} ogImage={`/og/${lang}/insights/${post.data.key}.jpg`}>
+  <PageHeader lang={lang} eyebrow={`${s.nav.insights} · ${minutes} ${s.labels.readingTime}`} title={post.data.title} lede={post.data.description} crumbs={[{ name: s.nav.insights, url: route('insights', lang) }, { name: post.data.title }]} image={cover}>
+    <p class="mono mt-8 text-xs text-ash">
+      {profile.name} · <time datetime={published}>{formatDate(published, lang)}</time>
+      {post.data.draft && <span class="ml-3 rounded-full bg-ember px-2 py-0.5 text-ink">{s.labels.draft}</span>}
+    </p>
+  </PageHeader>
+  <article class="surface-dark" data-surface="dark">
+    <div class="container-x pb-24">
+      <div class="prose-x mx-auto max-w-3xl">
+        <Content />
+      </div>
+      <div class="mx-auto mt-14 flex max-w-3xl items-center gap-4 border-t border-white/10 pt-8">
+        <span class="grid size-12 place-items-center rounded-full bg-gradient-to-br from-ember to-violet text-xs font-semibold text-ink">MAM</span>
+        <p class="text-sm text-ash"><a href={route('about', lang)} class="font-medium text-bone hover:text-ember">{profile.name}</a> · {profile.jobTitle[lang]}, Rome</p>
+      </div>
+    </div>
+  </article>
+  <CTABand lang={lang} />
+</Base>

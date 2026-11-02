@@ -1,0 +1,77 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import FAQ from '@/components/sections/FAQ.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { services } from '@/data/services';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+import { route } from '@/data/routes.mjs';
+import { t } from '@/i18n/ui';
+import { glyph, img } from '@/lib/images';
+import { graph, personNode, professionalServiceNode, webPageNode, breadcrumbNode, faqNode } from '@/lib/schema';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const s = t(lang);
+const it = lang === 'it';
+const title = it ? 'Servizi di AI e machine learning' : 'AI & machine learning services';
+const description = it
+  ? 'Consulenza e sviluppo AI da Roma: AI Opportunity Audit, agenti AI, LLM e document AI, machine learning predittivo, forecasting, computer vision e ricerca applicata. Remoto in Italia ed Europa.'
+  : 'AI consulting and engineering from Rome: AI Opportunity Audit, AI agents, LLMs and document AI, predictive machine learning, forecasting, computer vision and applied research. Remote across Europe.';
+const faqs = services.flatMap((sv) => sv.faqs[lang]).slice(0, 7);
+const jsonld = graph(
+  personNode(lang),
+  professionalServiceNode(lang),
+  webPageNode({ url: route('services', lang), name: title, description, lang, type: 'CollectionPage', dateModified: LAST_UPDATED }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: s.nav.services, url: route('services', lang) }]),
+  faqNode(faqs),
+);
+const [audit, ...rest] = services;
+---
+
+<Base title={`${title} · Amoruso Manzari`} description={description} lang={lang} jsonld={jsonld}>
+  <PageHeader
+    lang={lang}
+    eyebrow={s.nav.services}
+    title={it ? 'Dai dati che hai già' : 'From the data you already have'}
+    accent={it ? 'ai numeri che vuoi muovere.' : 'to the numbers you want to move.'}
+    lede={it ? 'Sette modi di lavorare insieme: si parte da un audit di due settimane e si arriva a modelli, agenti e previsioni in produzione.' : 'Seven ways to work together: start with a two-week audit and go all the way to models, agents and forecasts in production.'}
+    crumbs={[{ name: s.nav.services }]}
+    image={img('research-lab')}
+  />
+
+  <section class="surface-dark" data-surface="dark">
+    <div class="container-x pb-24">
+      <a href={audit.url(lang)} class="card spotlight group grid gap-8 border-ember/40 p-8 md:grid-cols-[auto_1fr_auto] md:items-center md:p-10">
+        {glyph(audit.glyph) && <Image src={glyph(audit.glyph)!} alt="" width={160} height={160} class="size-24 rounded-2xl object-cover" />}
+        <div>
+          <p class="mono text-xs text-ember">{it ? 'Il punto di partenza consigliato' : 'Recommended starting point'} · {audit.timeline[lang]}</p>
+          <h2 class="mt-2 text-3xl font-medium tracking-tight md:text-4xl">{audit.name[lang]}</h2>
+          <p class="mt-3 max-w-2xl text-ash">{audit.summary[lang]}</p>
+        </div>
+        <span class="btn btn-ember">{s.cta.learnMore} <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+
+      <ul class="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+        {rest.map((sv) => (
+          <li class="reveal">
+            <a href={sv.url(lang)} class="card spotlight group flex h-full flex-col p-7">
+              {glyph(sv.glyph) && <Image src={glyph(sv.glyph)!} alt="" width={128} height={128} class="size-16 rounded-xl object-cover" loading="lazy" />}
+              <h2 class="mt-6 text-2xl font-medium tracking-tight">{sv.name[lang]}</h2>
+              <p class="serif-accent mt-1 text-lg text-ember-2">{sv.short[lang]}</p>
+              <p class="mt-3 text-sm leading-relaxed text-ash">{sv.summary[lang]}</p>
+              <div class="mt-auto flex items-center justify-between pt-6">
+                <span class="mono text-[0.68rem] text-ash">{sv.timeline[lang]}</span>
+                <span class="text-sm font-medium">{s.cta.learnMore} <span class="inline-block transition-transform group-hover:translate-x-1">→</span></span>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <FAQ eyebrow={s.labels.faq} title={it ? 'Prima di iniziare.' : 'Before we start.'} items={faqs} />
+  <CTABand lang={lang} />
+</Base>

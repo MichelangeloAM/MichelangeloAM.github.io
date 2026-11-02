@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import { homeCopy } from '@/data/home';
+import { dataTile } from '@/lib/images';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).flow;
+
+const metas = ['pdf · 14 pp', 'eml · 2 attachments', 'jpg · 4032 px', 'row · 38 fields', 'kWh · 15 min', 'crm · 12 events'];
+const tiles = [1, 0, 2, 3, 4, 5]; // order of data-sheet tiles matching the inputs above
+const inY = [70, 170, 270, 370, 470, 570];
+const outY = [140, 260, 380, 500];
+const spark = ['M0 14 L10 12 L20 13 L30 8 L40 9 L50 4 L60 3', 'M0 12 L10 10 L20 11 L30 7 L40 6 L50 5 L60 2', 'M0 13 L10 13 L20 10 L30 11 L40 6 L50 5 L60 3', 'M0 3 L10 5 L20 4 L30 8 L40 9 L50 11 L60 13'];
+---
+
+<section class="surface-dark relative" data-surface="dark" data-flow>
+  <div class="flow-wrap relative md:h-[230vh]" data-flow-wrap>
+    <div class="flow-sticky md:sticky md:top-0 md:flex md:h-[100svh] md:flex-col md:justify-center">
+      <div class="container-x py-20 md:py-0">
+        <div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <p class="eyebrow reveal">{c.eyebrow}</p>
+            <h2 class="h2 reveal mt-5 max-w-3xl">{c.title} <span class="serif-accent text-gradient">{c.titleAccent}</span></h2>
+          </div>
+          <p class="lede reveal md:max-w-sm md:text-base">{c.sub}</p>
+        </div>
+
+        <div class="flow-stage relative mt-12 md:mt-10 md:aspect-[15/8] md:max-h-[62svh] md:w-full" data-flow-stage>
+          <!-- Connectors (desktop) -->
+          <svg class="pointer-events-none absolute inset-0 hidden h-full w-full md:block" viewBox="0 0 1200 640" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="fl-in" x1="0" x2="1"><stop offset="0" stop-color="#8b7cff" stop-opacity=".15" /><stop offset="1" stop-color="#ff7a1a" stop-opacity=".9" /></linearGradient>
+              <linearGradient id="fl-out" x1="0" x2="1"><stop offset="0" stop-color="#ff7a1a" stop-opacity=".9" /><stop offset="1" stop-color="#7ce3a1" stop-opacity=".5" /></linearGradient>
+            </defs>
+            {inY.map((y, i) => (
+              <>
+                <path id={`fin-${i}`} d={`M262 ${y} C 390 ${y}, 400 320, 486 320`} stroke="url(#fl-in)" stroke-width="1.4" fill="none" pathLength="1" class="flow-line" />
+                <circle r="3.2" fill="#ffb27a" class="flow-dot"><animateMotion dur={`${2.4 + i * 0.25}s`} repeatCount="indefinite" rotate="auto"><mpath href={`#fin-${i}`} /></animateMotion></circle>
+              </>
+            ))}
+            {outY.map((y, i) => (
+              <>
+                <path id={`fout-${i}`} d={`M714 320 C 800 320, 810 ${y}, 900 ${y}`} stroke="url(#fl-out)" stroke-width="1.4" fill="none" pathLength="1" class="flow-line" />
+                <circle r="3.2" fill="#b7ffd0" class="flow-dot"><animateMotion dur={`${2 + i * 0.3}s`} repeatCount="indefinite"><mpath href={`#fout-${i}`} /></animateMotion></circle>
+              </>
+            ))}
+          </svg>
+
+          <!-- Inputs -->
+          <ul class="grid grid-cols-2 gap-3 md:contents">
+            {c.inputs.map((label, i) => {
+              const t = dataTile(tiles[i]);
+              return (
+                <li
+                  class="flow-in card flex items-center gap-3 !rounded-2xl p-2.5 md:absolute md:w-[18.6%]"
+                  style={`left:1.5%; top:${((inY[i] - 32) / 640) * 100}%`}
+                  data-flow-in
+                >
+                  {t ? (
+                    <Image src={t} alt="" width={96} height={96} class="size-11 shrink-0 rounded-xl object-cover" loading="lazy" />
+                  ) : (
+                    <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-white/5 text-ember">◆</span>
+                  )}
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-medium">{label}</span>
+                    <span class="mono block truncate text-[0.66rem] text-ash">{metas[i]}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <!-- Core -->
+          <div class="flow-core relative mx-auto my-10 grid size-56 place-items-center md:absolute md:left-1/2 md:top-1/2 md:my-0 md:aspect-square md:size-auto md:w-[19%] md:-translate-x-1/2 md:-translate-y-1/2" data-flow-core>
+            <div class="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_35%_30%,rgb(255_255_255/0.35),rgb(139_124_255/0.25)_35%,rgb(255_122_26/0.25)_60%,transparent_72%)] shadow-[0_0_80px_10px_rgb(255_122_26/0.25),inset_0_0_40px_rgb(255_255_255/0.08)] ring-1 ring-white/20"></div>
+            <svg viewBox="0 0 100 100" class="absolute inset-[16%] animate-[spin_40s_linear_infinite] opacity-80" aria-hidden="true">
+              {Array.from({ length: 9 }).map((_, i) => {
+                const a = (i / 9) * Math.PI * 2;
+                const x = 50 + Math.cos(a) * 34;
+                const y = 50 + Math.sin(a) * 34;
+                return (
+                  <>
+                    <line x1="50" y1="50" x2={x} y2={y} stroke="#ff9a5c" stroke-opacity=".5" stroke-width=".6" />
+                    <circle cx={x} cy={y} r="2.4" fill={i % 2 ? '#8b7cff' : '#ff9a5c'} />
+                  </>
+                );
+              })}
+              <circle cx="50" cy="50" r="5" fill="#fff" fill-opacity=".9" />
+            </svg>
+            <span class="mono relative mt-[62%] rounded-full bg-ink/70 px-2.5 py-1 text-[0.65rem] uppercase tracking-[0.14em] text-bone backdrop-blur">{c.core}</span>
+          </div>
+
+          <!-- Outputs -->
+          <ul class="grid grid-cols-2 gap-3 md:contents">
+            {c.outputs.map((o, i) => (
+              <li
+                class="flow-out card !rounded-2xl p-3.5 md:absolute md:w-[22%]"
+                style={`right:1.5%; top:${((outY[i] - 40) / 640) * 100}%`}
+                data-flow-out
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-sm font-medium leading-tight">{o.k}</span>
+                  <span class="mono grid size-7 shrink-0 place-items-center rounded-full bg-mint/15 text-mint">{o.v}</span>
+                </div>
+                <svg viewBox="0 0 60 16" class="mt-2 h-5 w-full" aria-hidden="true"><path d={spark[i]} fill="none" stroke="#7ce3a1" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p class="mono mt-6 text-[0.68rem] text-ash/80 md:text-center">{c.note}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (min-width: 768px) {
+    .flow-line { stroke-dasharray: 1; stroke-dashoffset: var(--draw, 0); }
+  }
+</style>
+
+<script>
+  import { gsap, reducedMotion } from '@/scripts/motion';
+
+  const wrap = document.querySelector<HTMLElement>('[data-flow-wrap]');
+  const mq = window.matchMedia('(min-width: 768px)');
+  if (wrap && mq.matches && !reducedMotion()) {
+    const ins = wrap.querySelectorAll('[data-flow-in]');
+    const outs = wrap.querySelectorAll('[data-flow-out]');
+    const lines = wrap.querySelectorAll<SVGPathElement>('.flow-line');
+    const dots = wrap.querySelectorAll('.flow-dot');
+    gsap.set(lines, { attr: { 'stroke-dashoffset': 1 } });
+    gsap.set(dots, { opacity: 0 });
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: 0.8 },
+      defaults: { ease: 'none' },
+    });
+    tl.from(ins, { x: -120, opacity: 0, stagger: 0.08, duration: 0.6, ease: 'power2.out' })
+      .to([...lines].slice(0, 6), { attr: { 'stroke-dashoffset': 0 }, stagger: 0.05, duration: 0.5 }, '-=0.3')
+      .to([...dots].slice(0, 6), { opacity: 1, duration: 0.2 }, '<0.2')
+      .from('[data-flow-core]', { scale: 0.6, opacity: 0, duration: 0.6, ease: 'back.out(1.6)' }, '-=0.4')
+      .to([...lines].slice(6), { attr: { 'stroke-dashoffset': 0 }, stagger: 0.06, duration: 0.5 })
+      .to([...dots].slice(6), { opacity: 1, duration: 0.2 }, '<0.2')
+      .from(outs, { x: 120, opacity: 0, stagger: 0.1, duration: 0.6, ease: 'power2.out' }, '-=0.3')
+      .to({}, { duration: 0.6 });
+  }
+</script>

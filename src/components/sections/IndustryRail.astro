@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import { homeCopy } from '@/data/home';
+import { img } from '@/lib/images';
+import type { Lang } from '@/data/profile';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const c = homeCopy(lang).industries;
+---
+
+<section class="surface-dark relative overflow-hidden" data-surface="dark" id="industries">
+  <div class="relative" data-rail-wrap>
+    <div class="md:flex md:h-[100svh] md:flex-col md:justify-center" data-rail-pin>
+      <div class="container-x pt-24 md:pt-0">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p class="eyebrow reveal">{c.eyebrow}</p>
+            <h2 class="h2 reveal mt-5">{c.title}</h2>
+          </div>
+          <p class="lede reveal md:text-base">{c.sub}</p>
+        </div>
+      </div>
+      <div class="no-scrollbar mt-10 overflow-x-auto pb-24 md:overflow-visible md:pb-0" data-rail-scroller>
+        <ul class="flex w-max gap-4 px-[var(--gutter)] md:gap-5" data-rail-track>
+          {c.cards.map((card, i) => {
+            const image = img(card.img);
+            return (
+              <li class="rail-card spotlight card group relative h-[26rem] w-[17rem] shrink-0 !rounded-[1.6rem] md:h-[min(30rem,58svh)] md:w-[min(21rem,24vw)]">
+                {image ? (
+                  <Image src={image} alt="" widths={[400, 680]} sizes="(min-width: 768px) 24vw, 70vw" class="absolute inset-0 h-full w-full object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-105" loading="lazy" />
+                ) : (
+                  <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgb(255_122_26/0.35),transparent_60%)]"></div>
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 p-5">
+                  <p class="mono text-[0.65rem] text-ash">0{i + 1}</p>
+                  <h3 class="mt-1 text-2xl font-medium tracking-tight">{card.name}</h3>
+                  <ul class="mt-3 flex flex-wrap gap-1.5">
+                    {card.chips.map((chip) => <li class="chip !bg-ink/60 !text-bone/80 backdrop-blur">{chip}</li>)}
+                  </ul>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap, reducedMotion } from '@/scripts/motion';
+  const wrap = document.querySelector<HTMLElement>('[data-rail-wrap]');
+  const track = document.querySelector<HTMLElement>('[data-rail-track]');
+  const pin = document.querySelector<HTMLElement>('[data-rail-pin]');
+  if (wrap && track && pin && window.matchMedia('(min-width: 768px)').matches && !reducedMotion()) {
+    const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    gsap.to(track, {
+      x: () => -distance(),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: pin,
+        start: 'top top',
+        end: () => `+=${distance()}`,
+        pin: true,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+      },
+    });
+    gsap.utils.toArray<HTMLElement>('.rail-card').forEach((card, i) => {
+      gsap.from(card, { y: 60 + i * 10, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: pin, start: 'top 70%', once: true }, delay: i * 0.05 });
+    });
+  }
+</script>

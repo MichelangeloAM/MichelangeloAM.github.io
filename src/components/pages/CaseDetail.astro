@@ -1,0 +1,102 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import CTABand from '@/components/sections/CTABand.astro';
+import { cases, type CaseStudy } from '@/data/cases';
+import { serviceByKey } from '@/data/services';
+import { route } from '@/data/routes.mjs';
+import { img } from '@/lib/images';
+import { t, formatDate } from '@/i18n/ui';
+import { graph, creativeWorkNode, breadcrumbNode, webPageNode, personNode } from '@/lib/schema';
+import { profile, LAST_UPDATED, type Lang } from '@/data/profile';
+
+interface Props { lang: Lang; c: CaseStudy }
+const { lang, c } = Astro.props;
+const s = t(lang);
+const cover = img(c.cover);
+const it = lang === 'it';
+const H = it
+  ? { context: 'Qual era il contesto?', problem: 'Quale problema risolve?', approach: 'Come è stato costruito?', outcome: 'Cosa è cambiato?', stack: 'Tecnologie utilizzate' }
+  : { context: 'What was the context?', problem: 'What problem does it solve?', approach: 'How was it built?', outcome: 'What changed?', stack: 'Technology used' };
+const idx = cases.findIndex((x) => x.key === c.key);
+const next = cases[(idx + 1) % cases.length];
+const workLabel = s.nav.work;
+const pageTitle = `${c.seoTitle[lang]} · Amoruso Manzari`;
+const ogImage = `/og/${lang}/work/${c.key}.jpg`;
+const jsonld = graph(
+  personNode(lang),
+  webPageNode({ url: c.url(lang), name: c.title[lang], description: c.description[lang], lang, dateModified: LAST_UPDATED }),
+  creativeWorkNode({ name: c.title[lang], description: c.description[lang], url: c.url(lang), image: ogImage, lang, about: c.tags, dateModified: LAST_UPDATED, temporal: c.period.en }),
+  breadcrumbNode([{ name: s.labels.breadcrumbHome, url: route('home', lang) }, { name: workLabel, url: route('work', lang) }, { name: c.title[lang], url: c.url(lang) }]),
+);
+---
+
+<Base title={pageTitle} description={c.description[lang]} lang={lang} jsonld={jsonld} ogImage={ogImage} type="article" modified={LAST_UPDATED}>
+  <PageHeader lang={lang} eyebrow={c.kicker[lang]} title={c.title[lang]} crumbs={[{ name: workLabel, url: route('work', lang) }, { name: c.client }]} image={cover}>
+    <div class="mt-8 flex flex-wrap gap-2">{c.tags.map((tag) => <span class="chip">{tag}</span>)}</div>
+  </PageHeader>
+
+  <article class="surface-dark relative" data-surface="dark">
+    <div class="container-x grid gap-12 pb-24 lg:grid-cols-[1fr_20rem] lg:gap-20">
+      <div class="min-w-0">
+        <aside class="card border-ember/30 p-6 md:p-8" aria-label={s.labels.tldr}>
+          <p class="eyebrow">{s.labels.tldr}</p>
+          <p class="mt-4 text-xl leading-relaxed tracking-tight text-bone md:text-2xl">{c.tldr[lang]}</p>
+        </aside>
+
+        {cover && (
+          <figure class="mt-10 overflow-hidden rounded-[1.6rem] border border-white/10">
+            <Image src={cover} alt={it ? `Illustrazione del progetto: ${c.title.it}` : `Project illustration: ${c.title.en}`} widths={[640, 1024, 1440]} sizes="(min-width: 1024px) 60vw, 100vw" class="w-full" loading="lazy" />
+          </figure>
+        )}
+
+        <div class="prose-x mt-12">
+          <h2>{H.context}</h2>
+          <p>{c.context[lang]}</p>
+          <h2>{H.problem}</h2>
+          <p>{c.problem[lang]}</p>
+          <h2>{H.approach}</h2>
+          <ul>{c.approach[lang].map((a) => <li>{a}</li>)}</ul>
+          <h2>{H.outcome}</h2>
+          <ul>{c.outcome[lang].map((o) => <li>{o}</li>)}</ul>
+          <h2>{H.stack}</h2>
+        </div>
+        <ul class="mt-5 flex flex-wrap gap-2">{c.stack.map((x) => <li class="chip !text-bone/85">{x}</li>)}</ul>
+
+        <p class="mono mt-12 text-xs text-ash">{s.footer.updated}: <time datetime={LAST_UPDATED}>{formatDate(LAST_UPDATED, lang)}</time> · {it ? 'Dettagli riservati omessi.' : 'Confidential details omitted.'}</p>
+      </div>
+
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+        <dl class="card divide-y divide-white/10">
+          {[
+            [s.labels.client, c.client],
+            [s.labels.sector, c.sector[lang]],
+            [s.labels.period, c.period[lang]],
+            [s.labels.role, c.role[lang]],
+          ].map(([k, v]) => (
+            <div class="p-5"><dt class="mono text-[0.62rem] uppercase tracking-[0.12em] text-ash">{k}</dt><dd class="mt-1.5 text-sm leading-snug">{v}</dd></div>
+          ))}
+        </dl>
+        <div class="mt-5">
+          <p class="eyebrow">{s.labels.related}</p>
+          <ul class="mt-4 grid gap-2">
+            {c.services.map((k) => {
+              const sv = serviceByKey(k);
+              return <li><a href={sv.url(lang)} class="card spotlight block p-4 text-sm transition-colors hover:border-white/25">{sv.name[lang]} <span aria-hidden="true">→</span></a></li>;
+            })}
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <div class="container-x border-t border-white/10 py-14">
+      <a href={next.url(lang)} class="group flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <span class="mono text-xs text-ash">{it ? 'Prossimo caso studio' : 'Next case study'}</span>
+        <span class="text-2xl font-medium tracking-tight transition-colors group-hover:text-ember md:text-4xl">{next.title[lang]} →</span>
+      </a>
+    </div>
+  </article>
+
+  <CTABand lang={lang} />
+</Base>

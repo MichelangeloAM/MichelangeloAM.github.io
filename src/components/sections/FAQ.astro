@@ -1,0 +1,28 @@
+---
+interface Props { eyebrow: string; title: string; items: { q: string; a: string }[]; surface?: 'dark' | 'light'; id?: string }
+const { eyebrow, title, items, surface = 'light', id = 'faq' } = Astro.props;
+---
+
+<section class:list={[surface === 'dark' ? 'surface-dark' : 'surface-light', 'relative']} data-surface={surface} id={id}>
+  <div class="container-x section-y grid gap-12 md:grid-cols-[0.8fr_1.2fr]">
+    <div class="md:sticky md:top-28 md:self-start">
+      <p class="eyebrow reveal">{eyebrow}</p>
+      <h2 class="h2 reveal mt-5">{title}</h2>
+    </div>
+    <div class="divide-y divide-[var(--line)] border-y border-[var(--line)]" data-reveal-group>
+      {items.map((f, i) => (
+        <details class="faq reveal group py-1" open={i === 0}>
+          <summary class="flex cursor-pointer list-none items-start justify-between gap-6 py-5 text-lg font-medium tracking-tight md:text-xl">
+            <h3>{f.q}</h3>
+            <span class="mt-1 grid size-7 shrink-0 place-items-center rounded-full border border-[var(--line)] transition-transform duration-500 group-open:rotate-45" aria-hidden="true">+</span>
+          </summary>
+          <p class="pb-6 pr-10 leading-relaxed text-[var(--muted)]">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq summary::-webkit-details-marker { display: none; }
+</style>
